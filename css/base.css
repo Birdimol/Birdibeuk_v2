@@ -1,0 +1,114 @@
+@font-face 
+{
+    font-family: "naheulbeuk";
+    src: url('../font/BENGUIAB.TTF');
+}
+
+a, a:visited
+{
+    color:#3E404F;
+}
+
+.cadre_image
+{
+    background-color: #D5D5BD;
+    padding:20px;
+    border-radius: 20px;
+    border:1px #900000 solid;
+    text-align:center;
+    color:#900000;
+}   
+    
+.paragraphe
+{
+    padding:20px;
+    text-align:left;
+    font: 12px "open sans",sans-serif;
+    line-height: 2em;
+    text-align:justify;
+}
+
+.premiere_lettre
+{
+    font-size: 55px;
+    font-weight: bold;
+    float: left;
+    color: #900000;
+    height: 45px;
+    padding: 0px;
+    margin: 0px;
+    line-height: 50px;
+    margin-right:5px;
+}
+        
+body
+{
+    background-color: #E7E7D2;
+    color: #3E404F;
+    font-family: Arial,Helvetica,sans-serif;
+}
+
+.element_menu
+{
+    padding-left:20px;
+    padding-right:20px;
+    float:left;
+    cursor:pointer;
+}
+
+.element_menu:hover
+{
+    padding-left:20px;
+    padding-right:20px;
+    float:left;
+    cursor:pointer;
+    color:#900000;
+}
+
+#content
+{
+    max-width:980px;
+    margin: 0px auto;
+    padding-bottom:100px
+}
+
+#footer
+{
+    min-height : 50px;
+    background-color: #D5D5BD;
+    font-family:naheulbeuk;        
+}
+
+#footer_content
+{
+    margin: 0px auto;
+}
+
+#header
+{
+    height : 200px;
+    font-family:naheulbeuk;            
+}
+
+#header_content
+{
+    position:absolute;
+    top: 105px;
+    height:150px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    max-width:930px;
+}
+
+#header_bg
+{
+    position:absolute;
+    top: 100px;
+    height:60px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    width:100%;
+    background-color: #D5D5BD;
+}
