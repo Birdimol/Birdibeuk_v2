@@ -7,6 +7,13 @@
 a, a:visited
 {
     color:#3E404F;
+    text-decoration:none;
+}
+
+a:hover
+{
+    color:#900000;
+    text-decoration:none;
 }
 
 .cadre_image
@@ -94,7 +101,7 @@ body
 {
     position:absolute;
     top: 105px;
-    height:150px;
+    height:50px;
     right: 0px;
     bottom: 0px;
     left: 0px;

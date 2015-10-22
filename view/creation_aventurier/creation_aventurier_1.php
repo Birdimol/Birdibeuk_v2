@@ -2,7 +2,8 @@
     <div>
         <div class='paragraphe' style=''>
         <div class='premiere_lettre' >A</div>lors comme ça vous allez partir à l'aventure ?
-On va vous aider pour toutes les petites formalités adminisitratives. Répondez aux questions dans l'ordre et vous serez assuré d'avoir respecté toutes les lois de la terre de Fangh ! <br>
+On va vous aider pour toutes les petites formalités adminisitratives. Répondez aux questions dans l'ordre et vous serez assuré d'avoir respecté toutes 
+les lois de la terre de Fangh ! <br>
             <br>Vous voulez partir à l'aventure en tant que :
             <br>
                 <div class="cadre_image" style='width:200px;float:left;margin-right:20px;cursor:pointer;'>

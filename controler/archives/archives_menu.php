@@ -1,0 +1,9 @@
+<?php
+    if(is_file(ROOT."/view/archives/archives_menu.php"))
+    {
+        include(ROOT."/view/archives/archives_menu.php");
+    }
+    else
+    {
+        include(ROOT."/view/vue_introuvable.php");
+    }

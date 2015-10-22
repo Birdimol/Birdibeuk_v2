@@ -11,6 +11,10 @@
     {
         inclure_controleur(__DIR__."/../controler/creation_aventurier/".$ctrl.".php");
     }
+    else if(strpos($ctrl,"archives") !== false)
+    {
+        inclure_controleur(__DIR__."/../controler/archives/".$ctrl.".php");
+    }
     else
     {
         //controleur à la racine
