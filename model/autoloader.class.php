@@ -1,6 +1,24 @@
 <?php 
-	
-	function my_autoloader($class) //charge les class au fur et a mesure qu elle sont appelée 
+	/**
+     * @file autoloader.class.php 
+     * @brief Ce fichier définit la fonction my_autoloader() utilisée comme spl_autoload_register.
+     * @author  Birdimol
+     * @version 2.0 
+     * @date 30 octobre 2015
+     */
+    
+    /**
+     * @brief Charge les classes au fur et a mesure qu'elle sont appelées. 
+     *
+     * Essaie de charger la classe voulue dans le repertoire 'model'. Essaie le fichier nom_classe.class.php, 
+     * nom_class.php, puis la même chose avec seulement la première lettre de la classe en Majuscule.
+     *
+     * @author  Birdimol
+     * @version 2.0 
+     * @date 30 octobre 2015
+     * @param $class le nom de la classe à charger.
+     */
+	function my_autoloader($class)
 	{
         $class2 = strtoupper(substr($class,0,1)).strtolower(substr($class,1));
         

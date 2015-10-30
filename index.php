@@ -1,11 +1,20 @@
 <?php
+     /**
+     * @author  Birdimol
+     * @since   2.0
+     * Point d'entrée de l'application
+     * Toute requete sur le site (hors requete ajax) commence ici.
+     */
     session_start();
     
     include(__DIR__."/config/config.php");
     include(__DIR__."/model/autoloader.class.php");
     
-    error_reporting(E_ALL);
-    ini_set('display_errors', '1');
+    if(DEBUG)
+    {
+        error_reporting(E_ALL);
+        ini_set('display_errors', '1');
+    }
 ?>
 <!doctype html>
 <html lang="fr">

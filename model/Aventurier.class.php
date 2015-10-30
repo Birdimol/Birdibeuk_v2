@@ -1,206 +1,382 @@
 <?php
+/**
+ * @file Aventurier.class.php 
+ * @brief Ce fichier définit la classe Aventurier.
+ * @author  Birdimol
+ * @version 2.0 
+ * @date 30 octobre 2015
+ */
+
+ /**
+ * La classe Aventurier et ses méthodes.
+ * Cette classe permet la gestion des aventuriers.
+ * @author  Birdimol
+ * @version 2.0 
+ * @date 28 octobre 2015
+ */
 class Aventurier 
 { 
-    //Attributs
-    private $ID;		
-    private $NOM;		
-    private $SEXE;		
-    private $ID_ORIGINE;
-    private $ID_METIER;		
-    private $EV;		
-    private $EA;		
-    private $COU;		
-    private $INT;		
-    private $CHA;		
-    private $AD;		
-    private $FO;		
-    private $AT;		
-    private $PRD;		
-    private $XP;		
-    private $DESTIN;		
-    private $OR;		
-    private $ARGENT;		
-    private $CUIVRE;		
-    private $NIVEAU;
-    private $autre_metier;
-    private $METIER;
-    private $ORIGINE;
+    /**
+     * @brief int : ID du record en DB représentant l'Aventurier
+     */
+    private $AVENTURIER_ID;
+
+    /**
+     * @brief string : Nom de l'Aventurier
+     */
+    private $AVENTURIER_NOM;
+
+    /**
+     * @brief string : Sexe de l'Aventurier, texte libre
+     */
+    private $AVENTURIER_SEXE;	
+	
+    /**
+     * @brief int : Id en DB de l'origine de l'Aventurier
+     */
+    private $AVENTURIER_ID_ORIGINE;
     
-    private $idjoueur;
-    private $type;
+    /**
+     * @brief int : Id en DB du metier de l'Aventurier
+     */
+    private $AVENTURIER_ID_METIER;	
+	
+    /**
+     * @brief int : Point de vie maximum de l'Aventurier
+     */
+    private $AVENTURIER_EV;
+
+     /**
+     * @brief int : Point d'energie astrale maximum de l'Aventurier
+     */
+    private $AVENTURIER_EA;
     
-    private $MAGIEPHYS;
-    private $MAGIEPSY;
-    private $RESISTMAG;    
-    private $ID_TYPEMAGIE;
-    private $ID_DIEU;
+    /**
+     * @brief int : Courage de l'Aventurier
+     */
+    private $AVENTURIER_COU;
     
-    private $DIEU;
+    /**
+     * @brief int : Intelligence de l'Aventurier
+     */	
+    private $AVENTURIER_INT;
+
+    /**
+     * @brief int : Charisme de l'Aventurier
+     */	
+    private $AVENTURIER_CHA;
+
+    /**
+     * @brief int : Adresse de l'Aventurier
+     */	
+    private $AVENTURIER_AD;
+
+     /**
+     * @brief int : Force de l'Aventurier
+     */	
+    private $AVENTURIER_FO;
+
+     /**
+     * @brief int : Point d'attaque de l'Aventurier
+     */	
+    private $AVENTURIER_AT;
+
+    /**
+     * @brief int : Point de parade de l'Aventurier
+     */		
+    private $AVENTURIER_PRD;
+
+    /**
+     * @brief int : Point d'expérience de l'Aventurier
+     */	
+    private $AVENTURIER_XP;
     
-    private $COMPETENCESCHOISIES;
-    private $COMPETENCESLIEES;
+    /**
+     * @brief int : Point de destin de l'Aventurier
+     */		
+    private $AVENTURIER_DESTIN;
+
+    /**
+     * @brief int : Nombre de pièces d'or possédées par l'Aventurier
+     */    
+    private $AVENTURIER_OR;
+    
+    /**
+     * @brief int : Nombre de pièces d'argent possédées par l'Aventurier
+     */
+    private $AVENTURIER_ARGENT;
+
+    /**
+     * @brief int : Nombre de pièces de cuivre possédées par l'Aventurier
+     */    
+    private $AVENTURIER_CUIVRE;	
+
+	/**
+     * @brief int : Niveau de l'Aventurier
+     */  
+    private $AVENTURIER_NIVEAU;
+    
+    /**
+     * @brief string : Permet à l'Aventurier de renommer métier officiel (Chasseur de prime, boulanger, ...)
+     */  
+    private $AVENTURIER_AUTRE_METIER;
+    
+    /**
+     * @brief int : Id en DB du joueur possédant l'Aventurier
+     */
+    private $AVENTURIER_USER_ID;
+    
+    /**
+     * @brief int : Spécifie si l'Aventurier est de type "aventurier" ou un "soldat"
+     */
+    private $AVENTURIER_TYPE;
+    
+    /**
+     * @brief int : Score de Magie physique (moyenne INT/AD) de l'Aventurier
+     */
+    private $AVENTURIER_MAGIEPHYS;
+    
+    /**
+     * @brief int : Score de Magie psychique (moyenne INT/CHA) de l'Aventurier
+     */
+    private $AVENTURIER_MAGIEPSY;
+    
+    /**
+     * @brief int : Score de résistance magique (moyenne COU/INT/FO) de l'Aventurier
+     */
+    private $AVENTURIER_RESISTMAG;
+    
+    /**
+     * @brief int : Id en DB du type de magie pratiquée par l'Aventurier
+     *
+     * 0 = pas de magie pratiquée
+     */
+    private $AVENTURIER_TYPEMAGIE_ID;
+    
+    /**
+     * @brief int : Id en DB du dieu de l'Aventurier
+     *
+     * 0 = pas de Dieu
+     */
+    private $AVENTURIER_DIEU_ID;
+        
+    /**
+     * @brief array : Tableau contenant toutes les compétences choisies par l'Aventurier en plus de ses compétences liées
+     */
+    private $competences_choisies;
+    
+    /**
+     * @brief array : Tableau contenant toutes les compétences liées à l'Aventurier de par son origine et son métier
+     */
+    private $competences_liees;
+    
+    /**
+     * @brief array : Tableau contenant toutes les compétences de l'Aventurier
+     */
     private $competences;
     
-    private $PR_MAX;
-    private $PR;
+    /**
+     * @brief int : Protection maximum de l'Aventurier en fonction de son origine et métier
+     */
+    private $AVENTURIER_PR_MAX;
     
-    private $codeacces;
+    /**
+     * @brief int : Protection réelle de l'Aventurier en fonction de son matos
+     */
+    private $AVENTURIER_PR;
     
+    /**
+     * @brief string : Code d'accès à l'Aventurier pour modifier ses données
+     */
+    private $AVENTURIER_CODEACCES;
+    
+    /**
+     * @brief array : Tableau contenant toutes les armes de l'Aventurier
+     */
     private $armes;
+    
+    /**
+     * @brief array : Tableau contenant toutes les protections de l'Aventurier
+     */
     private $protections;
+    
+    /**
+     * @brief array : Tableau contenant toutes les equipement de l'Aventurier
+     */
     private $equipements;
     
-    private $bonus_degat;
+    /**
+     * @brief int : Score de bonus aux dégats de l'Aventurier
+     */
+    private $AVENTURIER_BONUS_DEGAT;
     
-    private $image_url;
+    /**
+     * @brief string : url de l'image de l'Aventurier
+     */
+    private $AVENTURIER_IMAGE_URL;
     
-    private $evactuel;
-    private $eaactuel;
-    private $description;
+    /**
+     * @brief int : Points de vie actuels de l'Aventurier
+     */
+    private $AVENTURIER_EVACTUEL;
     
+    /**
+     * @brief int : Points d'énergie astrale actuels de l'Aventurier
+     */
+    private $AVENTURIER_EAACTUEL;
     
-
-    //constructeur
-    public function __construct($ID_envoye = '', $NOM_envoye = '', $SEXE_envoye = '', $ID_ORIGINE_envoye = '', $ID_METIER_envoye = '', 
-    $EV_envoye = '', $EA_envoye = '', $COU_envoye = '', $INT_envoye = '', $CHA_envoye = '', $AD_envoye = '', $FO_envoye = '', $AT_envoye = '', 
-    $PRD_envoye = '', $XP_envoye = '', $DESTIN_envoye = '', $OR_envoye = '', $ARGENT_envoye = '', $CUIVRE_envoye = '', $NIVEAU_envoye = '', 
-    $idjoueur_envoye = 0, $type_envoye = 0, $MAGIEPHYS_envoye = '' , $MAGIEPSY_envoye = '', $RESISTMAG_envoye = '', 
-    $ID_TYPEMAGIE_envoye = 0, $ID_DIEU_envoye = 0, $COMPETENCESCHOISIES_envoye = array(), $PR_MAX_envoye = 0, $codeacces_envoye = "", $PR_envoye = 0
-    ,$bonus_degat_envoye = 0,$image_url_envoye = '',$autre_metier_envoye = ''
-    ,$evactuel_envoye = '',$eaactuel_envoye = '',$description_envoye = '')
+    /**
+     * @brief string : Description de l'Aventurier
+     */
+    private $AVENTURIER_DESCRIPTION;
+    
+    /**
+     * @brief Dieu : Dieu de l'Aventurier
+     *
+     * null = pas de Dieu
+     */
+    private $dieu;
+    
+    /**
+     * @brief Metier : Metier de l'Aventurier
+     */
+    private $metier;
+    
+    /**
+     * @brief Origine : Origine de l'Aventurier
+     */
+    private $origine;
+    
+    /**
+     * @brief S'assure que l'Aventurier est prêt pour l'affichage.
+     *
+     * Permet de s'assurer que les tableaux de l'Aventurier ne soient pas à NULL et ne provoquent pas d'erreur dans les vues.
+     * @return void
+     */
+    public function prepareObjet()
     {
-        $this->armes = array();
-        $this->protections = array();
-        $this->equipements = array();
-        
-        //si ID
-        if(!empty($ID_envoye) && empty($NOM_envoye))
+        if(empty($this->armes) || $this->armes == null || $this->armes=="")
         {
-            if(is_array($ID_envoye))
-			{
-				foreach($ID_envoye as $var=>$value)
-				{
-					$this->$var = $value;
-				}
-				
-				if($this->METIER != "" && $this->ORIGINE != "")
-				{
-					$this->competences = fusionneCompetencesSansDoublons($this->METIER->COMPETENCESLIEES,$this->ORIGINE->COMPETENCESLIEES);
-				}
-				else 
-				{
-					$this->competences = $this->ORIGINE->COMPETENCESLIEES;
-				}				
-				$this->competences = fusionneCompetencesSansDoublons($this->COMPETENCESCHOISIES,$this->COMPETENCESLIEES);            
-				$this->METIER = new METIER($this->ID_METIER);
-				$this->ORIGINE = new ORIGINE($this->ID_ORIGINE);
-			}
-			else
-			{
-				$this->get_data_from_db($ID_envoye);
-			}
+            $this->armes = array();
         }
-        else
+        if(empty($this->protections) || $this->protections == null || $this->protections=="")
         {
-            $this->ID = $ID_envoye;
-            $this->NOM = $NOM_envoye;
-            $this->SEXE = $SEXE_envoye;
-            $this->ID_ORIGINE = $ID_ORIGINE_envoye;
-            $this->ID_METIER = $ID_METIER_envoye;
-            $this->EV = $EV_envoye;
-            $this->EA = $EA_envoye;
-            $this->COU = $COU_envoye;
-            $this->INT = $INT_envoye;
-            $this->CHA = $CHA_envoye;
-            $this->AD = $AD_envoye;
-            $this->FO = $FO_envoye;
-            $this->AT = $AT_envoye;
-            $this->PRD = $PRD_envoye;
-            $this->XP = $XP_envoye;
-            $this->DESTIN = $DESTIN_envoye;
-            $this->OR = $OR_envoye;
-            $this->ARGENT = $ARGENT_envoye;
-            $this->CUIVRE = $CUIVRE_envoye;
-            $this->NIVEAU = $NIVEAU_envoye;
-            $this->autre_metier = $autre_metier_envoye;
-            
-            $this->METIER = new METIER($this->ID_METIER);
-            $this->ORIGINE = new ORIGINE($this->ID_ORIGINE);
-            
-            $this->idjoueur = $idjoueur_envoye;
-            $this->type = $type_envoye;
-            $this->MAGIEPHYS = $MAGIEPHYS_envoye;
-            $this->MAGIEPSY = $MAGIEPSY_envoye;
-            $this->RESISTMAG = $RESISTMAG_envoye;    
-            $this->ID_TYPEMAGIE = $ID_TYPEMAGIE_envoye;
-            $this->ID_DIEU = $ID_DIEU_envoye;
-            
-            $this->COMPETENCESCHOISIES = $COMPETENCESCHOISIES_envoye;
-            
-            if($this->METIER != "" && $this->ORIGINE != "")
-            {
-                $this->competences = fusionneCompetencesSansDoublons($this->METIER->COMPETENCESLIEES,$this->ORIGINE->COMPETENCESLIEES);
-            }
-            else 
-            {
-                $this->competences = $this->ORIGINE->COMPETENCESLIEES;
-            }
-            
-            $this->competences = fusionneCompetencesSansDoublons($this->COMPETENCESCHOISIES,$this->COMPETENCESLIEES);
-            
-            $this->PR_MAX = $PR_MAX_envoye;
-            $this->PR = $PR_envoye;
-            $this->codeacces = $codeacces_envoye;
-            $this->bonus_degat =$bonus_degat_envoye;
-            $this->image_url =$image_url_envoye;
-            
-            $this->eaactuel =$eaactuel_envoye;
-            $this->evactuel =$evactuel_envoye;
-            $this->description =$description_envoye;
+            $this->protections = array();
+        }
+        if(empty($this->equipements) || $this->equipements == null || $this->equipements=="")
+        {
+            $this->equipements = array();
+        }
+        if(empty($this->COMPETENCESCHOISIES) || $this->COMPETENCESCHOISIES == null || $this->COMPETENCESCHOISIES=="")
+        {
+            $this->COMPETENCESCHOISIES = array();
+        }
+        if(empty($this->COMPETENCESLIEES) || $this->COMPETENCESLIEES == null || $this->COMPETENCESLIEES=="")
+        {
+            $this->COMPETENCESLIEES = array();
+        }
+        if(empty($this->competences) || $this->competences == null || $this->competences=="")
+        {
+            $this->competences = array();
         }
     }
 
-    //get
-    public function __get($var)
+    /**
+     * @brief Constructeur de la classe Aventurier
+     *
+     * Peut être initialisé sans paramètres, avec un tableau dont 
+     * les index correspondant aux attributs ou encore avec l'ID 
+     * en DB du record correspondant à l'objet.
+     * @param   $parametre parametre optionel, peut être un tableau ou un id en db.      
+     *
+     * @return  Aventurier 
+     * l'Objet instancié
+     */
+    public function __construct($parametre = null)
     {
+        $this->prepareObjet();
+        
+        //Le paramètre envoyé est-il vide ?
+        if(is_null($parametre) || empty($parametre))
+        {
+            //Si le paramètre envoyé est vide l'objet reste vide aussi.
+        }
+        else if(is_array($parametre))
+        {
+            $this->loadFromArray($parametre);               
+        }
+        else if(is_numeric($parametre))
+        {
+            $this->loadFromDB($parametre);
+        }
+    }
+
+    /**
+     * @brief Getter de la classe Aventurier
+     *
+     * Retourne l'attribut voulu, effectue les traitements nécessaires si l'attribut demandé n'est pas encore chargé ou complexe.
+     * @param   $var Nom de l'attribut voulu.      
+     *
+     * @return  Mixed l'attribut voulu. 
+     * 
+     */
+    public function __get($var)
+    {        
         if($var == "magie")
         {
-            $magie = new Magie($this->ID_TYPEMAGIE);
-            return $magie->NOM;
+            if(!is_object($this->MAGIE))
+            {
+                $this->MAGIE = new Magie($this->ID_TYPEMAGIE);
+            }
+            
+            return $this->MAGIE->NOM;
         }
         else if($var == "dieu")
         {
-            $dieu = new Dieu($this->ID_DIEU);
-            return $dieu->NOM;
+            if(!is_object($this->DIEU))
+            {
+                $this->DIEU = new Dieu($this->ID_DIEU);
+            }
+            return $this->DIEU->NOM;
         }
-        else
+        else if(property_exists("Aventurier",$var))
         {
             return $this->$var;	
         }
+        else
+        {
+            return null;	
+        }
     }
     
-    //set
+    /**
+     * @brief Setter de la classe Aventurier
+     *
+     * Place la valeur voulue dans l'attribut de l'objet Aventurier, avec certains contrôles.
+     * @param   $var Nom de l'attribut voulu.      
+     * @param   $value Valeur voulue.      
+     *
+     * @return  void
+     * 
+     */
     public function __set($var, $value)
     {
-        if($var == "ID_ORIGINE")
+        if($var == "ORIGINE_ID")
         {
-            $this->ID_ORIGINE = $value;
-            $origine = new Origine();
-            $origine->get_data_from_db($value);
+            $this->ORIGINE_ID = $value;
+            $origine = new Origine($value);
             $this->ORIGINE = $origine;
         }
-        else if($var == "ID_METIER")
+        else if($var == "METIER_ID")
         {
-            $this->ID_METIER = $value;
-            $metier = new Metier();
-            $metier->get_data_from_db($value);
+            $this->METIER_ID = $value;
+            $metier = new Metier($value);
             $this->METIER = $metier;
         }
-        else if($var == "ID_DIEU")
+        else if($var == "DIEU_ID")
         {
-            $this->ID_DIEU = $value;
-            $dieu = new Dieu();
-            $dieu->get_data_from_db($value);
+            $this->DIEU_ID = $value;
+            $dieu = new Dieu($value);
             $this->DIEU = $dieu;
         }
         else
@@ -209,22 +385,21 @@ class Aventurier
         }
     }	
 
-    //set all from form
-    public function set_all_from_form($post)
-    {				
-        foreach($post as $key=>$value)
+    /**
+     * @brief Charge les attributs de l'Aventurier avec le tableau passé en parametre
+     *
+     * Place la valeur voulue dans l'attribut "clé" de l'objet Aventurier.
+     * @param   $array Tableau 
+     * 
+     * @return  void
+     */
+    public function loadFromArray($array)
+    {			
+        foreach($array as $key=>$value)
         {
-            if(isset($this->$key))
+            if(property_exists("Aventurier",$key))
             {
                 $this->$key = $value;
-                if($key == "ID_ORIGINE")
-                {                    
-                    $this->ORIGINE = new ORIGINE($this->ID_ORIGINE);
-                }
-                else if($key == "ID_METIER")
-                {
-                    $this->METIER = new METIER($this->ID_METIER);
-                }
             }
             else if($key == "autre_metier")
             {
@@ -234,115 +409,71 @@ class Aventurier
             {
                 $this->image_url = $value;
             }
-        }
-    }
-
-    public function print_form()
-    {
-        ?>
-        <table>
-            <input type='hidden' id='ID' value='<?php echo $this->ID; ?>' name='ID' />
-            <tr><td><label for='NOM'>NOM</label></td><td><input type='text' id='NOM' value='<?php echo $this->NOM; ?>' name='NOM' /></td></tr>
-            <tr><td><label for='SEXE'>SEXE</label></td><td><input type='text' id='SEXE' value='<?php echo $this->SEXE; ?>' name='SEXE' /></td></tr>
-            <tr><td><label for='ID_ORIGINE'>ID_ORIGINE</label></td><td><input type='text' id='ID_ORIGINE' value='<?php echo $this->ID_ORIGINE; ?>' name='ID_ORIGINE' /></td></tr>
-            <tr><td><label for='ID_METIER'>ID_METIER</label></td><td><input type='text' id='ID_METIER' value='<?php echo $this->ID_METIER; ?>' name='ID_METIER' /></td></tr>
-            <tr><td><label for='EV'>EV</label></td><td><input type='text' id='EV' value='<?php echo $this->EV; ?>' name='EV' /></td></tr>
-            <tr><td><label for='EA'>EA</label></td><td><input type='text' id='EA' value='<?php echo $this->EA; ?>' name='EA' /></td></tr>
-            <tr><td><label for='COU'>COU</label></td><td><input type='text' id='COU' value='<?php echo $this->COU; ?>' name='COU' /></td></tr>
-            <tr><td><label for='INT'>INT</label></td><td><input type='text' id='INT' value='<?php echo $this->INT; ?>' name='INT' /></td></tr>
-            <tr><td><label for='CHA'>CHA</label></td><td><input type='text' id='CHA' value='<?php echo $this->CHA; ?>' name='CHA' /></td></tr>
-            <tr><td><label for='AD'>AD</label></td><td><input type='text' id='AD' value='<?php echo $this->AD; ?>' name='AD' /></td></tr>
-            <tr><td><label for='FO'>FO</label></td><td><input type='text' id='FO' value='<?php echo $this->FO; ?>' name='FO' /></td></tr>
-            <tr><td><label for='AT'>AT</label></td><td><input type='text' id='AT' value='<?php echo $this->AT; ?>' name='AT' /></td></tr>
-            <tr><td><label for='PRD'>PRD</label></td><td><input type='text' id='PRD' value='<?php echo $this->PRD; ?>' name='PRD' /></td></tr>
-            <tr><td><label for='XP'>XP</label></td><td><input type='text' id='XP' value='<?php echo $this->XP; ?>' name='XP' /></td></tr>
-            <tr><td><label for='DESTIN'>DESTIN</label></td><td><input type='text' id='DESTIN' value='<?php echo $this->DESTIN; ?>' name='DESTIN' /></td></tr>
-            <tr><td><label for='OR'>OR</label></td><td><input type='text' id='OR' value='<?php echo $this->OR; ?>' name='OR' /></td></tr>
-            <tr><td><label for='ARGENT'>ARGENT</label></td><td><input type='text' id='ARGENT' value='<?php echo $this->ARGENT; ?>' name='ARGENT' /></td></tr>
-            <tr><td><label for='CUIVRE'>CUIVRE</label></td><td><input type='text' id='CUIVRE' value='<?php echo $this->CUIVRE; ?>' name='CUIVRE' /></td></tr>
-            <tr><td><label for='NIVEAU'>NIVEAU</label></td><td><input type='text' id='NIVEAU' value='<?php echo $this->NIVEAU; ?>' name='NIVEAU' /></td></tr>
-        </table>
-        <?php
-    }
-
-    //liste
-    public static function Lister($ordre = "NOM ASC",$nom="")
-    {
-        $ordre = str_replace("ID_METIER","METIER.NOM",$ordre);
-        $ordre = str_replace("ID_ORIGINE","ORIGINE.NOM",$ordre);
-        
-        $ordre = strtolower($ordre);
-        
-        $db = getConnexionDB();
-        $requete = "SELECT aventurier.* FROM aventurier join origine on origine.ID = ID_ORIGINE join metier on metier.ID = ID_METIER ";
-
-        if(!empty($nom))
-        {
-            $requete .= " WHERE aventurier.NOM LIKE '".$nom."%'";
-        }
-
-        $requete .= " ORDER BY ".$ordre;
-
-        $tableau = array();
-        $stmt = $db->prepare($requete);
-
-        if(!$stmt->execute())
-        {
-            if(DEBUG)
+            else if($key == "METIER_NOM")
             {
-                $debug .= "<br>ERROR : ".$requete;
+                $this->metier = new Metier($array);
+            }
+            else if($key == "ORIGINE_NOM")
+            {
+                $this->origine = new Origine($array);
             }
         }
-
-        while ($rs = $stmt->fetch(PDO::FETCH_ASSOC))
-        {
-            $temp = new aventurier($rs['ID']);       
-            $tableau[] =$temp;
-        }
-        return $tableau;
     }
+
+   
 	
-	//liste
-    public static function Lister2($ordre = "NOM ASC",$nom="")
-    {
-        $ordre = str_replace("ID_METIER","METIER.NOM",$ordre);
-        $ordre = str_replace("ID_ORIGINE","ORIGINE.NOM",$ordre);
+	/**
+     * @brief Liste tous les aventuriers dans l'ordre donné et éventuellement filtrés par nom
+     *
+     * Place la valeur voulue dans l'attribut "clé" de l'objet Aventurier.
+     * @param   $ordre définit quel ORDER BY utiliser dans la requête 
+     * @param   $nom   définit quel filtre utiliser sur le nom 
+     * 
+     * @return  Tableau<Aventurier>
+     */
+    public static function Lister($ordre = "AVENTURIER_NOM ASC",$nom="")
+    {        
+        //Si dans l'ordre, on a reçu l'id metier ou origine, il ne faut
+        //pas trier sur l'ID mais bien sur le nom de l'origine ou du metier.
+        $ordre = str_replace("METIER_ID","METIER.NOM",$ordre);
+        $ordre = str_replace("ORIGINE_ID","ORIGINE.NOM",$ordre);
         
         $ordre = strtolower($ordre);
         
-        $db = getConnexionDB();
-        $requete = "SELECT aventurier.* FROM aventurier join origine on origine.ID = ID_ORIGINE join metier on metier.ID = ID_METIER ";
+        $db = DatabaseManager::getDb();
+        $requete = "SELECT ".PREFIX_DB."aventurier.*,".PREFIX_DB."metier.* 
+            FROM ".PREFIX_DB."aventurier 
+            join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = AVENTURIER_ORIGINE_ID 
+            join ".PREFIX_DB."metier on ".PREFIX_DB."metier.METIER_ID = AVENTURIER_METIER_ID ";
 
+        //si on a envoyé un nom, on balance le filtre dans la requete.
         if(!empty($nom))
         {
-            $requete .= " WHERE aventurier.NOM LIKE '".$nom."%'";
+            $requete .= " WHERE ".PREFIX_DB."aventurier.AVENTURIER_NOM LIKE '".$nom."%'";
         }
 
         $requete .= " ORDER BY ".$ordre;
 
         $tableau = array();
         $stmt = $db->prepare($requete);
-
-        if(!$stmt->execute())
+        
+        if($stmt->execute())
         {
-            if(DEBUG)
+            while ($rs = $stmt->fetch(PDO::FETCH_ASSOC))
             {
-                $debug .= "<br>ERROR : ".$requete;
+                //on 
+                $temp = new Aventurier($rs);       
+                $tableau[] =$temp;
             }
         }
-
-        while ($rs = $stmt->fetch(PDO::FETCH_ASSOC))
-        {
-            $temp = new aventurier($rs);       
-            $tableau[] =$temp;
-        }
+        
         return $tableau;
     }
     
     public static function ListerAsTable($ordre = "NOM ASC",$nom="")
     {
-        $ordre = str_replace("ID_METIER","METIER.NOM",$ordre);
-        $ordre = str_replace("ID_ORIGINE","ORIGINE.NOM",$ordre);
+        $ordre = str_replace("METIER_ID","METIER.NOM",$ordre);
+        $ordre = str_replace("ORIGINE_ID","ORIGINE.NOM",$ordre);
         
         $ordre = strtolower($ordre);
         
@@ -350,8 +481,8 @@ class Aventurier
         $requete = "SELECT av.*,origine.nom as NOM_ORIGINE,metier.nom AS NOM_METIER, 
         (SELECT COUNT(*) FROM lien_aventurier_competence where ID_AVENTURIER = av.ID AND ID_COMPETENCE = 27) as COMPETENCE_27 
         FROM aventurier av
-        join origine on origine.ID = ID_ORIGINE 
-        join metier on metier.ID = ID_METIER ";
+        join origine on origine.ID = ORIGINE_ID 
+        join metier on metier.ID = METIER_ID ";
 
         if(!empty($nom))
         {
@@ -380,8 +511,8 @@ class Aventurier
 	
 	public static function ListerMesAventuriers($ordre = "NOM ASC",$nom="")
 	{
-		$ordre = str_replace("ID_METIER","METIER.NOM",$ordre);
-        $ordre = str_replace("ID_ORIGINE","ORIGINE.NOM",$ordre);
+		$ordre = str_replace("METIER_ID","METIER.NOM",$ordre);
+        $ordre = str_replace("ORIGINE_ID","ORIGINE.NOM",$ordre);
         
         $ordre = strtolower($ordre);
 		
@@ -399,7 +530,7 @@ class Aventurier
 			return array();
 		}
 		
-        $requete = "SELECT aventurier.* FROM aventurier join origine on origine.ID = ID_ORIGINE join metier on metier.ID = ID_METIER ";
+        $requete = "SELECT aventurier.* FROM aventurier join origine on origine.ID = ORIGINE_ID join metier on metier.ID = METIER_ID ";
 
         $requete .= " WHERE aventurier.idjoueur = ".$user->id;      
 
@@ -423,7 +554,7 @@ class Aventurier
 
         while ($rs = $stmt->fetch(PDO::FETCH_ASSOC))
         {
-           $temp = new aventurier($rs['ID'], $rs['NOM'], $rs['SEXE'], $rs['ID_ORIGINE'], $rs['ID_METIER'], $rs['EV'], $rs['EA'], $rs['COU'], 
+           $temp = new aventurier($rs['ID'], $rs['NOM'], $rs['SEXE'], $rs['ORIGINE_ID'], $rs['METIER_ID'], $rs['EV'], $rs['EA'], $rs['COU'], 
             $rs['INT'], $rs['CHA'], $rs['AD'], $rs['FO'], $rs['AT'], $rs['PRD'], $rs['XP'], $rs['DESTIN'], $rs['OR'], $rs['ARGENT'], $rs['CUIVRE'], 
             $rs['NIVEAU'], $rs['idjoueur'], $rs['type'],
             $rs['MAGIEPHYS'],
@@ -447,8 +578,8 @@ class Aventurier
     
     public function verifieValeurs()
     {       
-        if(empty($this->ID_ORIGINE)){$this->ID_ORIGINE = 0;}
-        if(empty($this->ID_METIER)){$this->ID_METIER = 0;}
+        if(empty($this->ORIGINE_ID)){$this->ORIGINE_ID = 0;}
+        if(empty($this->METIER_ID)){$this->METIER_ID = 0;}
         if(empty($this->EV)){$this->EV = 0;}
         if(empty($this->EA)){$this->EA = 0;}
         
@@ -512,10 +643,10 @@ class Aventurier
 			$this->idjoueur = $user->id;
 		}
         
-        $requete = "INSERT INTO aventurier (NOM, SEXE, ID_ORIGINE, ID_METIER, EV, EA, COU, `INT`, CHA, AD, FO, AT, PRD, XP, DESTIN, `OR`, ARGENT, CUIVRE, 
+        $requete = "INSERT INTO aventurier (NOM, SEXE, ORIGINE_ID, METIER_ID, EV, EA, COU, `INT`, CHA, AD, FO, AT, PRD, XP, DESTIN, `OR`, ARGENT, CUIVRE, 
         NIVEAU, idjoueur, `type` ,MAGIEPHYS, MAGIEPSY, RESISTMAG, ID_TYPEMAGIE, ID_DIEU, PR_MAX,codeacces,PR,bonus_degat,image_url, autre_metier,
         evactuel, eaactuel, description) 
-        VALUES ('".str_replace("'","''",$this->NOM)."', '".$this->SEXE."', ".$this->ID_ORIGINE.", ".$this->ID_METIER.", ".$this->EV.", ".$this->EA.", ".$this->COU.", ".$this->INT.", ".
+        VALUES ('".str_replace("'","''",$this->NOM)."', '".$this->SEXE."', ".$this->ORIGINE_ID.", ".$this->METIER_ID.", ".$this->EV.", ".$this->EA.", ".$this->COU.", ".$this->INT.", ".
         $this->CHA.", ".$this->AD.", ".$this->FO.", ".$this->AT.", ".$this->PRD.", ".$this->XP.", ".$this->DESTIN.", ".$this->OR.", ".$this->ARGENT.", ".
         $this->CUIVRE.", ".$this->NIVEAU.", ".$this->idjoueur.", ".$this->type.", ".$this->MAGIEPHYS.", ".$this->MAGIEPSY.", ".$this->RESISTMAG.", ".
         $this->ID_TYPEMAGIE.", ".$this->ID_DIEU.", ".$this->PR_MAX.", '".$this->codeacces."', ".$this->PR.", ".$this->bonus_degat.", '".$this->image_url."', '".str_replace("'","''",$this->autre_metier)."',
@@ -544,14 +675,14 @@ class Aventurier
         
         foreach($this->armes as $arme)
         {
-            $requete = "INSERT INTO lien_aventurier_arme (id_aventurier, id_arme) VALUES (".$this->ID.",".$arme->ID.")";    
+            $requete = "INSERT INTO lien_aventurier_arme (id_aventurier, id_arme) VALUES (".$this->AVENTURIER_ID.",".$arme->ID.")";    
             $stmt = $db->prepare($requete);
             $stmt->execute();
         }
-        
+    
         foreach($this->protections as $protection)
         {
-            $requete = "INSERT INTO lien_aventurier_protection (id_aventurier, id_protection) VALUES (".$this->ID.",".$protection->ID.")";  
+            $requete = "INSERT INTO lien_aventurier_protection (id_aventurier, id_protection) VALUES (".$this->AVENTURIER_ID.",".$protection->ID.")";  
   
             $stmt = $db->prepare($requete);
             $stmt->execute();
@@ -576,8 +707,8 @@ class Aventurier
         }
         
         $db = getConnexionDB();
-        $requete = "UPDATE aventurier SET NOM = '".str_replace("'","''",$this->NOM)."',idjoueur = ".$this->idjoueur.", SEXE = '".$this->SEXE."', ID_ORIGINE = ".$this->ID_ORIGINE.", 
-        ID_METIER = ".$this->ID_METIER.", EV = ".$this->EV.", EA = ".$this->EA.", COU = ".$this->COU.", `INT` = ".$this->INT.", CHA = ".$this->CHA.", 
+        $requete = "UPDATE aventurier SET NOM = '".str_replace("'","''",$this->NOM)."',idjoueur = ".$this->idjoueur.", SEXE = '".$this->SEXE."', ORIGINE_ID = ".$this->ORIGINE_ID.", 
+        METIER_ID = ".$this->METIER_ID.", EV = ".$this->EV.", EA = ".$this->EA.", COU = ".$this->COU.", `INT` = ".$this->INT.", CHA = ".$this->CHA.", 
         AD = ".$this->AD.", FO = ".$this->FO.", AT = ".$this->AT.", PRD = ".$this->PRD.", XP = ".$this->XP.", DESTIN = ".$this->DESTIN.", 
         `OR` = ".$this->OR.", ARGENT = ".$this->ARGENT.", CUIVRE = ".$this->CUIVRE.", NIVEAU = ".$this->NIVEAU.", `TYPE` = ".$this->type." ,
         MAGIEPHYS = ".$this->MAGIEPHYS.", MAGIEPSY = ".$this->MAGIEPSY.", RESISTMAG = ".$this->RESISTMAG.", ID_TYPEMAGIE = ".
@@ -681,7 +812,7 @@ class Aventurier
     }
 
     //get_data_from_db
-    public function get_data_from_db($id)
+    public function loadFromDB($id)
     {
         $db = getConnexionDB();
         $requete = "SELECT * FROM aventurier WHERE ID = ".$id;    
@@ -696,8 +827,8 @@ class Aventurier
         $this->ID = $ligne['ID']; 
         $this->NOM = $ligne['NOM']; 
         $this->SEXE = $ligne['SEXE']; 
-        $this->ID_ORIGINE = $ligne['ID_ORIGINE']; 
-        $this->ID_METIER = $ligne['ID_METIER']; 
+        $this->ORIGINE_ID = $ligne['ORIGINE_ID']; 
+        $this->METIER_ID = $ligne['METIER_ID']; 
         $this->EV = $ligne['EV']; 
         $this->EA = $ligne['EA']; 
         $this->COU = $ligne['COU']; 
@@ -717,8 +848,8 @@ class Aventurier
         $this->type = $ligne['type'];
         $this->autre_metier = $ligne['autre_metier'];
         
-        $this->METIER = new METIER($this->ID_METIER);
-        $this->ORIGINE = new ORIGINE($this->ID_ORIGINE);
+        $this->METIER = new METIER($this->METIER_ID);
+        $this->ORIGINE = new ORIGINE($this->ORIGINE_ID);
         
         $this->MAGIEPHYS = $ligne['MAGIEPHYS'];
         $this->MAGIEPSY = $ligne['MAGIEPSY'];
