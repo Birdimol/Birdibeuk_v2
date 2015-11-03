@@ -8,7 +8,8 @@
  */
 
  /**
- * La classe Aventurier et ses méthodes.
+ * @brief La classe Aventurier.
+ *
  * Cette classe permet la gestion des aventuriers.
  * @author  Birdimol
  * @version 2.0 
@@ -411,10 +412,16 @@ class Aventurier
             }
             else if($key == "METIER_NOM")
             {
+                // Ceci dans le cas ou le tableau envoyé en parametre vient de la DB et possède
+                // les données de la table METIER, on peut alors charger le metier directement 
+                // sans refaire une requete.
                 $this->metier = new Metier($array);
             }
             else if($key == "ORIGINE_NOM")
             {
+                // Ceci dans le cas ou le tableau envoyé en parametre vient de la DB et possède
+                // les données de la table ORIGINE, on peut alors charger l'origine directement 
+                // sans refaire une requete.
                 $this->origine = new Origine($array);
             }
         }
@@ -425,7 +432,7 @@ class Aventurier
 	/**
      * @brief Liste tous les aventuriers dans l'ordre donné et éventuellement filtrés par nom
      *
-     * Place la valeur voulue dans l'attribut "clé" de l'objet Aventurier.
+     * Renvoie la liste d'aventurier sous forme d'un tableau d'objet.
      * @param   $ordre définit quel ORDER BY utiliser dans la requête 
      * @param   $nom   définit quel filtre utiliser sur le nom 
      * 
@@ -449,13 +456,17 @@ class Aventurier
         //si on a envoyé un nom, on balance le filtre dans la requete.
         if(!empty($nom))
         {
-            $requete .= " WHERE ".PREFIX_DB."aventurier.AVENTURIER_NOM LIKE '".$nom."%'";
+            $requete .= " WHERE ".PREFIX_DB."aventurier.AVENTURIER_NOM LIKE ':nom%'";
         }
 
         $requete .= " ORDER BY ".$ordre;
 
         $tableau = array();
         $stmt = $db->prepare($requete);
+        if(!empty($nom))
+        {
+            $sth->bindParam(':nom', $nom, PDO::PARAM_STR);
+        }
         
         if($stmt->execute())
         {
@@ -470,262 +481,483 @@ class Aventurier
         return $tableau;
     }
     
+    /**
+     * @brief Liste tous les aventuriers dans l'ordre donné et éventuellement filtrés par nom
+     *
+     * Renvoie la liste d'aventurier sous forme de tableau, pas d'objet.
+     * @param   $ordre définit quel ORDER BY utiliser dans la requête 
+     * @param   $nom   définit quel filtre utiliser sur le nom 
+     * 
+     * @return  Tableau<Tableau>
+     */
     public static function ListerAsTable($ordre = "NOM ASC",$nom="")
     {
+        //Si dans l'ordre, on a reçu l'id metier ou origine, il ne faut
+        //pas trier sur l'ID mais bien sur le nom de l'origine ou du metier.
         $ordre = str_replace("METIER_ID","METIER.NOM",$ordre);
         $ordre = str_replace("ORIGINE_ID","ORIGINE.NOM",$ordre);
         
         $ordre = strtolower($ordre);
         
-        $db = getConnexionDB();
-        $requete = "SELECT av.*,origine.nom as NOM_ORIGINE,metier.nom AS NOM_METIER, 
-        (SELECT COUNT(*) FROM lien_aventurier_competence where ID_AVENTURIER = av.ID AND ID_COMPETENCE = 27) as COMPETENCE_27 
-        FROM aventurier av
-        join origine on origine.ID = ORIGINE_ID 
-        join metier on metier.ID = METIER_ID ";
+        $db = DatabaseManager::getDb();
+        $requete = "SELECT ".PREFIX_DB."aventurier.*,".PREFIX_DB."metier.* 
+            FROM ".PREFIX_DB."aventurier 
+            join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = AVENTURIER_ORIGINE_ID 
+            join ".PREFIX_DB."metier on ".PREFIX_DB."metier.METIER_ID = AVENTURIER_METIER_ID ";
 
+        //si on a envoyé un nom, on balance le filtre dans la requete.
         if(!empty($nom))
         {
-            $requete .= " WHERE aventurier.NOM LIKE '".$nom."%'";
+            $requete .= " WHERE ".PREFIX_DB."aventurier.AVENTURIER_NOM LIKE ':nom%'";
         }
 
         $requete .= " ORDER BY ".$ordre;
 
         $tableau = array();
         $stmt = $db->prepare($requete);
-
-        if(!$stmt->execute())
+        if(!empty($nom))
         {
-            if(DEBUG)
-            {
-                $debug .= "<br>ERROR : ".$requete;
+            $sth->bindParam(':nom', $nom, PDO::PARAM_STR);
+        }
+        
+        if($stmt->execute())
+        {
+            while ($rs = $stmt->fetch(PDO::FETCH_ASSOC))
+            {     
+                $tableau[] = $rs;
             }
         }
-
-        while ($rs = $stmt->fetch(PDO::FETCH_ASSOC))
-        {       
-            $tableau[] = $rs;
-        }
+        
         return $tableau;
     }
 	
-	public static function ListerMesAventuriers($ordre = "NOM ASC",$nom="")
+    /**
+     * @brief Liste tous les aventuriers de l'utilisateur dont l'id est envoyé en paramètre.
+     *
+     * Renvoie la liste d'aventurier sous forme d'un tableau d'objet Aventurier.
+     * @param   $user_id l'id de l'utilisateur dont la liste des aventuriers doit être renvoyée
+     * @param   $ordre définit quel ORDER BY utiliser dans la requête 
+     * @param   $nom   définit quel filtre utiliser sur le nom
+     * 
+     * @return  Tableau<Aventurier>
+     */
+	public static function ListerMesAventuriers($user_id, $ordre = "NOM ASC",$nom="")
 	{
-		$ordre = str_replace("METIER_ID","METIER.NOM",$ordre);
+		//Si dans l'ordre, on a reçu l'id metier ou origine, il ne faut
+        //pas trier sur l'ID mais bien sur le nom de l'origine ou du metier.
+        $ordre = str_replace("METIER_ID","METIER.NOM",$ordre);
         $ordre = str_replace("ORIGINE_ID","ORIGINE.NOM",$ordre);
         
         $ordre = strtolower($ordre);
-		
-		if(!isset($_SESSION["birdibeuk_user"]))
-		{
-			return array();
-		}
-		
-		$db = getConnexionDB();		
-		
-		$user = unserialize($_SESSION["birdibeuk_user"]);
         
-        if($user->id == null || $user->id == 0)
+        if($user_id == null || $user_id == 0)
 		{
 			return array();
 		}
 		
-        $requete = "SELECT aventurier.* FROM aventurier join origine on origine.ID = ORIGINE_ID join metier on metier.ID = METIER_ID ";
+        $db = DatabaseManager::getDb();
+        $requete = "SELECT ".PREFIX_DB."aventurier.*,".PREFIX_DB."metier.* 
+            FROM ".PREFIX_DB."aventurier 
+            join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = AVENTURIER_ORIGINE_ID 
+            join ".PREFIX_DB."metier on ".PREFIX_DB."metier.METIER_ID = AVENTURIER_METIER_ID 
+            WHERE ".PREFIX_DB."aventurier.aventurier_user_id = :user_id";      
 
-        $requete .= " WHERE aventurier.idjoueur = ".$user->id;      
-
-		if(!empty($nom))
+		//si on a envoyé un nom, on balance le filtre dans la requete.
+        if(!empty($nom))
         {
-            $requete .= " AND aventurier.NOM LIKE '".$nom."%'";
-        }		
+            $requete .= " AND ".PREFIX_DB."aventurier.AVENTURIER_NOM LIKE ':nom%'";
+        }	
 	
 		$requete .= " ORDER BY ".$ordre;
 
         $tableau = array();
         $stmt = $db->prepare($requete);
-
-        if(!$stmt->execute())
+        
+        $sth->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        if(!empty($nom))
         {
-            if(DEBUG)
+            $sth->bindParam(':nom', $nom, PDO::PARAM_STR);
+        }
+        
+        if($stmt->execute())
+        {
+            while ($rs = $stmt->fetch(PDO::FETCH_ASSOC))
             {
-                $debug .= "<br>ERROR : ".$requete;
+                $temp = new Aventurier($rs);       
+                $tableau[] =$temp;
             }
         }
-
-        while ($rs = $stmt->fetch(PDO::FETCH_ASSOC))
-        {
-           $temp = new aventurier($rs['ID'], $rs['NOM'], $rs['SEXE'], $rs['ORIGINE_ID'], $rs['METIER_ID'], $rs['EV'], $rs['EA'], $rs['COU'], 
-            $rs['INT'], $rs['CHA'], $rs['AD'], $rs['FO'], $rs['AT'], $rs['PRD'], $rs['XP'], $rs['DESTIN'], $rs['OR'], $rs['ARGENT'], $rs['CUIVRE'], 
-            $rs['NIVEAU'], $rs['idjoueur'], $rs['type'],
-            $rs['MAGIEPHYS'],
-            $rs['MAGIEPSY'],
-            $rs['RESISTMAG'],
-            $rs['ID_TYPEMAGIE'],
-            $rs['ID_DIEU'],
-			array(),
-            $rs['PR_MAX'],
-            $rs['codeacces'],
-            $rs['PR'],
-            $rs['bonus_degat'],
-            $rs['image_url'],$rs["autre_metier"],$rs["evactuel"],$rs["eaactuel"],$rs["description"]);
-			
-			$temp->majCompetenceDB();
-			
-			$tableau[] = $temp;
-        }
+       
         return $tableau;
 	}
     
+    /**
+     * @brief S'assure que toutes les valeurs des attributs de l'objet sont correcte
+     * pour être éventuellement utilisée dans une requête.
+     *
+     * Renvoie la liste d'aventurier sous forme d'un tableau d'objet Aventurier.
+     * 
+     * @return  void
+     */
     public function verifieValeurs()
     {       
-        if(empty($this->ORIGINE_ID)){$this->ORIGINE_ID = 0;}
-        if(empty($this->METIER_ID)){$this->METIER_ID = 0;}
-        if(empty($this->EV)){$this->EV = 0;}
-        if(empty($this->EA)){$this->EA = 0;}
+        if(empty($this->AVENTURIER_ORIGINE_ID)){$this->AVENTURIER_ORIGINE_ID = 0;}
+        if(empty($this->AVENTURIER_METIER_ID)){$this->AVENTURIER_METIER_ID = 0;}
+        if(empty($this->AVENTURIER_EV)){$this->AVENTURIER_EV = 0;}
+        if(empty($this->AVENTURIER_EA)){$this->AVENTURIER_EA = 0;}
         
-        if(empty($this->evactuel)){$this->evactuel = 0;}
-        if(empty($this->eaactuel)){$this->eaactuel = 0;}
+        if(empty($this->AVENTURIER_EVACTUEL)){$this->AVENTURIER_EVACTUEL = 0;}
+        if(empty($this->AVENTURIER_EAACTUEL)){$this->AVENTURIER_EAACTUEL = 0;}
         
-        if(empty($this->COU)){$this->COU = 0;}
-        if(empty($this->FOR)){$this->FOR = 0;}
-        if(empty($this->AT)){$this->AT = 0;}
-        if(empty($this->PRD)){$this->PRD = 0;}
-        if(empty($this->AD)){$this->AD = 0;}
-        if(empty($this->CHA)){$this->CHA = 0;}
-        if(empty($this->INT)){$this->INT = 0;}        
+        if(empty($this->AVENTURIER_COU)){$this->AVENTURIER_COU = 0;}
+        if(empty($this->AVENTURIER_FOR)){$this->AVENTURIER_FOR = 0;}
+        if(empty($this->AVENTURIER_AT)){$this->AVENTURIER_AT = 0;}
+        if(empty($this->AVENTURIER_PRD)){$this->AVENTURIER_PRD = 0;}
+        if(empty($this->AVENTURIER_AD)){$this->AVENTURIER_AD = 0;}
+        if(empty($this->AVENTURIER_CHA)){$this->AVENTURIER_CHA = 0;}
+        if(empty($this->AVENTURIER_INT)){$this->AVENTURIER_INT = 0;}        
         
-        if(empty($this->XP)){$this->XP = 0;}
-        if(empty($this->DESTIN)){$this->DESTIN = 0;}
+        if(empty($this->AVENTURIER_XP)){$this->AVENTURIER_XP = 0;}
+        if(empty($this->AVENTURIER_DESTIN)){$this->AVENTURIER_DESTIN = 0;}
         
-        if(empty($this->OR)){$this->OR = 0;}
-        if(empty($this->ARGENT)){$this->ARGENT = 0;}
-        if(empty($this->CUIVRE)){$this->CUIVRE = 0;}
+        if(empty($this->AVENTURIER_OR)){$this->AVENTURIER_OR = 0;}
+        if(empty($this->AVENTURIER_ARGENT)){$this->AVENTURIER_ARGENT = 0;}
+        if(empty($this->AVENTURIER_CUIVRE)){$this->AVENTURIER_CUIVRE = 0;}
         
-        if(empty($this->NIVEAU)){$this->NIVEAU = 0;}
-        if(empty($this->idjoueur)){$this->idjoueur = 0;}
-        if(empty($this->type) || $this->type=="aventurier"){$this->type = 0;}
-        if(empty($this->MAGIEPHYS)){$this->MAGIEPHYS = 0;}
-        if(empty($this->MAGIEPSY)){$this->MAGIEPSY = 0;}
-        if(empty($this->RESISTMAG)){$this->RESISTMAG = 0;}
-        if(empty($this->ID_TYPEMAGIE)){$this->ID_TYPEMAGIE = 0;}
-        if(empty($this->ID_DIEU)){$this->ID_DIEU = 0;}
-        if(empty($this->PR_MAX)){$this->PR_MAX = 0;}
-        if(empty($this->PR)){$this->PR = 0;}        
-        if(empty($this->bonus_degat)){$this->bonus_degat = 0;}        
+        if(empty($this->AVENTURIER_NIVEAU)){$this->AVENTURIER_NIVEAU = 0;}
+        if(empty($this->AVENTURIER_USER_ID)){$this->AVENTURIER_USER_ID = 0;}
+        if(empty($this->AVENTURIER_TYPE) || $this->AVENTURIER_TYPE=="aventurier"){$this->AVENTURIER_TYPE = 0;}
+        if(empty($this->AVENTURIER_MAGIEPHYS)){$this->AVENTURIER_MAGIEPHYS = 0;}
+        if(empty($this->AVENTURIER_MAGIEPSY)){$this->AVENTURIER_MAGIEPSY = 0;}
+        if(empty($this->AVENTURIER_RESISTMAG)){$this->AVENTURIER_RESISTMAG = 0;}
+        if(empty($this->AVENTURIER_TYPEMAGIE_ID)){$this->AVENTURIER_TYPEMAGIE_ID = 0;}
+        if(empty($this->AVENTURIER_DIEU_ID)){$this->AVENTURIER_DIEU_ID = 0;}
+        if(empty($this->AVENTURIER_PR_MAX)){$this->AVENTURIER_PR_MAX = 0;}
+        if(empty($this->AVENTURIER_PR)){$this->AVENTURIER_PR = 0;}        
+        if(empty($this->AVENTURIER_BONUS_DEGAT)){$this->AVENTURIER_BONUS_DEGAT = 0;}        
     }
     
+    /**
+     * @brief Calcul le total de PR de l'Aventurier
+     *
+     * Calcul le total de PR de l'Aventurier en fonction de l'équipement qu'il porte.
+     * 
+     * @return  void
+     */
     public function calculProtection()
     {
-        $this->PR = 0;
+        $this->AVENTURIER_PR = 0;
         
         foreach($this->protections as $protection)
         {
-            $this->PR += $protection->PR;
+            $this->AVENTURIER_PR += $protection->PR;
         }
     }
-
+    
+    /**
+     * @brief Génère la requete d'ajout d'un Aventurier en DB
+     * 
+     * @return $requete La requete générée
+     */
+    private function get_requete_ajout()
+    {
+        $requete = "INSERT INTO aventurier (
+            AVENTURIER_NOM, 
+            AVENTURIER_SEXE, 
+            AVENTURIER_ORIGINE_ID, 
+            AVENTURIER_METIER_ID, 
+            AVENTURIER_EV, 
+            AVENTURIER_EA, 
+            AVENTURIER_COU, 
+            AVENTURIER_INT, 
+            AVENTURIER_CHA, 
+            AVENTURIER_AD, 
+            AVENTURIER_FO, 
+            AVENTURIER_AT, 
+            AVENTURIER_PRD, 
+            AVENTURIER_XP, 
+            AVENTURIER_DESTIN, 
+            AVENTURIER_OR, 
+            AVENTURIER_ARGENT, 
+            AVENTURIER_CUIVRE,
+            AVENTURIER_NIVEAU, 
+            AVENTURIER_USER_ID, 
+            AVENTURIER_TYPE,
+            AVENTURIER_MAGIEPHYS, 
+            AVENTURIER_MAGIEPSY, 
+            AVENTURIER_RESISTMAG, 
+            AVENTURIER_TYPEMAGIE_ID, 
+            AVENTURIER_DIEU_ID, 
+            AVENTURIER_PR_MAX,
+            AVENTURIER_codeacces,
+            AVENTURIER_PR,
+            AVENTURIER_BONUS_DEGAT,
+            AVENTURIER_image_url, 
+            AVENTURIER_autre_metier,
+            AVENTURIER_EVACTUEL,
+            AVENTURIER_EAACTUEL, 
+            AVENTURIER_description) 
+        VALUES (
+            :AVENTURIER_NOM, 
+            :AVENTURIER_SEXE, 
+            :AVENTURIER_ORIGINE_ID, 
+            :AVENTURIER_METIER_ID, 
+            :AVENTURIER_EV, 
+            :AVENTURIER_EA, 
+            :AVENTURIER_COU, 
+            :AVENTURIER_INT, 
+            :AVENTURIER_CHA, 
+            :AVENTURIER_AD, 
+            :AVENTURIER_FO, 
+            :AVENTURIER_AT, 
+            :AVENTURIER_PRD, 
+            :AVENTURIER_XP, 
+            :AVENTURIER_DESTIN, 
+            :AVENTURIER_OR, 
+            :AVENTURIER_ARGENT, 
+            :AVENTURIER_CUIVRE,
+            :AVENTURIER_NIVEAU, 
+            :AVENTURIER_USER_ID, 
+            :AVENTURIER_TYPE,
+            :AVENTURIER_MAGIEPHYS, 
+            :AVENTURIER_MAGIEPSY, 
+            :AVENTURIER_RESISTMAG, 
+            :AVENTURIER_TYPEMAGIE_ID, 
+            :AVENTURIER_DIEU_ID, 
+            :AVENTURIER_PR_MAX,
+            :AVENTURIER_codeacces,
+            :AVENTURIER_PR,
+            :AVENTURIER_BONUS_DEGAT,
+            :AVENTURIER_image_url, 
+            :AVENTURIER_autre_metier,
+            :AVENTURIER_EVACTUEL,
+            :AVENTURIER_EAACTUEL, 
+            :AVENTURIER_description)";
+            
+        return $requete;
+    }
+    
+    /**
+     * @brief Bind les données de Aventurier à une requete PDO préparée.
+     * 
+     * @return void
+     */
+    private bindParam($sth)
+    {
+        $sth->bindParam(':AVENTURIER_NOM',$this->AVENTURIER_NOM,PDO::PARAM_STR);
+        $sth->bindParam(':AVENTURIER_SEXE',$this->AVENTURIER_SEXE,PDO::PARAM_STR);
+        $sth->bindParam(':AVENTURIER_ORIGINE_ID',$this->AVENTURIER_ORIGINE_ID,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_METIER_ID',$this->AVENTURIER_METIER_ID,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_EV', $this->AVENTURIER_EV,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_EA', $this->AVENTURIER_EA,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_COU', $this->AVENTURIER_COU,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_INT', $this->AVENTURIER_INT,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_CHA', $this->AVENTURIER_CHA,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_AD', $this->AVENTURIER_AD,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_FO', $this->AVENTURIER_FO,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_AT', $this->AVENTURIER_AT,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_PRD', $this->AVENTURIER_PRD,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_XP', $this->AVENTURIER_XP,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_DESTIN', $this->AVENTURIER_DESTIN,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_OR', $this->AVENTURIER_OR,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_ARGENT', $this->AVENTURIER_ARGENT,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_CUIVRE',$this->AVENTURIER_CUIVRE,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_NIVEAU', $this->AVENTURIER_NIVEAU,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_USER_ID', $this->AVENTURIER_USER_ID,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_TYPE',$this->AVENTURIER_TYPE,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_MAGIEPHYS', $this->AVENTURIER_MAGIEPHYS,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_MAGIEPSY', $this->AVENTURIER_MAGIEPSY,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_RESISTMAG', $this->AVENTURIER_RESISTMAG,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_TYPEMAGIE_ID', $this->AVENTURIER_TYPEMAGIE_ID,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_DIEU_ID', $this->AVENTURIER_DIEU_ID,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_PR_MAX',$this->AVENTURIER_PR_MAX,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_codeacces',$this->AVENTURIER_codeacces,PDO::PARAM_STR);
+        $sth->bindParam(':AVENTURIER_PR',$this->AVENTURIER_PR,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_BONUS_DEGAT',$this->AVENTURIER_BONUS_DEGAT,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_image_url', $this->AVENTURIER_image_url,PDO::PARAM_STR);
+        $sth->bindParam(':AVENTURIER_autre_metier',$this->AVENTURIER_autre_metier,PDO::PARAM_STR);
+        $sth->bindParam(':AVENTURIER_EVACTUEL',$this->AVENTURIER_EVACTUEL,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_EAACTUEL', ,$this->AVENTURIER_EAACTUEL,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_description',$this->AVENTURIER_description,PDO::PARAM_STR);
+    }
+    
+    /**
+     * @brief Ajoute l'Aventurier en DB.
+     *
+     * Ajoute également ses armes(Arme), protections(Protection), équipements(Equipement) et compétences(Competence).
+     * 
+     * @return  void
+     */
     public function ajouter()
     {
         $this->verifieValeurs();
         $this->calculProtection();
         
         $db = getConnexionDB();
-        
-        if(empty($this->codeacces))
+        try
         {
-            $temp = md5(rand(0,9999999999999999999));
-            $this->codeacces = substr($temp,0,10);
-        }
-		
-		if(isset($_SESSION["birdibeuk_user"]))
-		{
-			$user = unserialize($_SESSION["birdibeuk_user"]);
-			$this->idjoueur = $user->id;
-		}
+            $db->beginTransaction();
         
-        $requete = "INSERT INTO aventurier (NOM, SEXE, ORIGINE_ID, METIER_ID, EV, EA, COU, `INT`, CHA, AD, FO, AT, PRD, XP, DESTIN, `OR`, ARGENT, CUIVRE, 
-        NIVEAU, idjoueur, `type` ,MAGIEPHYS, MAGIEPSY, RESISTMAG, ID_TYPEMAGIE, ID_DIEU, PR_MAX,codeacces,PR,bonus_degat,image_url, autre_metier,
-        evactuel, eaactuel, description) 
-        VALUES ('".str_replace("'","''",$this->NOM)."', '".$this->SEXE."', ".$this->ORIGINE_ID.", ".$this->METIER_ID.", ".$this->EV.", ".$this->EA.", ".$this->COU.", ".$this->INT.", ".
-        $this->CHA.", ".$this->AD.", ".$this->FO.", ".$this->AT.", ".$this->PRD.", ".$this->XP.", ".$this->DESTIN.", ".$this->OR.", ".$this->ARGENT.", ".
-        $this->CUIVRE.", ".$this->NIVEAU.", ".$this->idjoueur.", ".$this->type.", ".$this->MAGIEPHYS.", ".$this->MAGIEPSY.", ".$this->RESISTMAG.", ".
-        $this->ID_TYPEMAGIE.", ".$this->ID_DIEU.", ".$this->PR_MAX.", '".$this->codeacces."', ".$this->PR.", ".$this->bonus_degat.", '".$this->image_url."', '".str_replace("'","''",$this->autre_metier)."',
-        ".$this->evactuel.",".$this->eaactuel.",'".str_replace("'","''",$this->description)."')";
-        
-        $stmt = $db->prepare($requete);
-        $stmt->execute();
-        $this->ID = $db->lastInsertId(); 
-        
-        foreach($this->COMPETENCESCHOISIES as $competence)
-        {
-            $requete = "INSERT INTO lien_aventurier_competence (ID_AVENTURIER, ID_COMPETENCE) VALUES (".$this->ID.",".$competence->ID.")";    
-            $stmt = $db->prepare($requete);
-            $stmt->execute();
-        }
-        
-        foreach($this->equipements as $equipement)
-        {
-            for($a=0;$a<$equipement->nombre;$a++)
+            //On génère un code d'accès aléatoire de 10 caractères si l'Aventurier n'en possède pas déjà.
+            if(empty($this->codeacces))
             {
-                $requete = "INSERT INTO lien_aventurier_equipement (id_aventurier, id_equipement, precieux) VALUES (".$this->ID.",".$equipement->ID.",".$equipement->precieux.")";    
+                $temp = md5(rand(0,9999999999999999999));
+                $this->codeacces = substr($temp,0,10);
+            }
+            
+            if(isset($_SESSION["birdibeuk_user"]))
+            {
+                $user = unserialize($_SESSION["birdibeuk_user"]);
+                $this->idjoueur = $user->id;
+            }
+            
+            //récupération de la requête d'ajout
+            $requete = $this->get_requete_ajout();
+            
+            $sth = $db->prepare($requete);
+            
+            //binding des paramètres
+            $this->bindParam($sth);
+            
+            $stmt->execute();
+            $this->AVENTURIRE_ID = $db->lastInsertId(); 
+            
+            //competences         
+            if(count($this->COMPETENCESCHOISIES) > 0)
+            {
+                $requete = "INSERT INTO lien_aventurier_competence (ID_AVENTURIER, ID_COMPETENCE) VALUES "; 
+                $compte = 0;
+                foreach($this->COMPETENCESCHOISIES as $competence)
+                {
+                    if($compte > 0)
+                    {
+                        $requete .= ",";
+                    }
+                    $requete .= "(".$this->ID.",".$competence->ID.")";
+                    $compte++;                    
+                }
                 $stmt = $db->prepare($requete);
                 $stmt->execute();
             }
-        }
+            
+            
+            foreach($this->equipements as $equipement)
+            {
+                for($a=0;$a<$equipement->nombre;$a++)
+                {
+                    $requete = "INSERT INTO lien_aventurier_equipement (id_aventurier, id_equipement, precieux) VALUES (".$this->ID.",".$equipement->ID.",".$equipement->precieux.")";    
+                    $stmt = $db->prepare($requete);
+                    $stmt->execute();
+                }
+            }
+            
+            foreach($this->armes as $arme)
+            {
+                $requete = "INSERT INTO lien_aventurier_arme (id_aventurier, id_arme) VALUES (".$this->AVENTURIER_ID.",".$arme->ID.")";    
+                $stmt = $db->prepare($requete);
+                $stmt->execute();
+            }
         
-        foreach($this->armes as $arme)
-        {
-            $requete = "INSERT INTO lien_aventurier_arme (id_aventurier, id_arme) VALUES (".$this->AVENTURIER_ID.",".$arme->ID.")";    
-            $stmt = $db->prepare($requete);
-            $stmt->execute();
+            foreach($this->protections as $protection)
+            {
+                $requete = "INSERT INTO lien_aventurier_protection (id_aventurier, id_protection) VALUES (".$this->AVENTURIER_ID.",".$protection->ID.")";  
+      
+                $stmt = $db->prepare($requete);
+                $stmt->execute();
+            }
+            
+            $db->commit();
+            //succes
+            return true;            
         }
-    
-        foreach($this->protections as $protection)
+        catch(Exception $e) //en cas d'erreur
         {
-            $requete = "INSERT INTO lien_aventurier_protection (id_aventurier, id_protection) VALUES (".$this->AVENTURIER_ID.",".$protection->ID.")";  
-  
-            $stmt = $db->prepare($requete);
-            $stmt->execute();
+            //on annule la transation
+            $db->rollback();
+
+            //on affiche un message d'erreur ainsi que les erreurs
+            echo 'Tout ne s\'est pas bien passé, voir les erreurs ci-dessous<br />';
+            echo 'Erreur : '.$e->getMessage().'<br />';
+            echo 'N° : '.$e->getCode();
+
+            //on arrête l'exécution s'il y a du code après
+            return false;
         }
     }
 
+    /**
+     * @brief Modifie l'Aventurier en DB.
+     *
+     * Modifie également ses armes(Arme), protections(Protection), équipements(Equipement) et compétences(Competence).
+     * 
+     * @return  void
+     */
     public function modifier()
     {
         $this->verifieValeurs();
         
         //si cet aventurier n'appartient à personne, alors la personne qui le modifie en premier en prend possession
-        if($this->idjoueur == 0)
+        if($this->AVENTURIER_USER_ID == 0)
         {
             if(isset($_SESSION["birdibeuk_user"]))
             {
                 if($_SESSION["birdibeuk_user"] != false)
                 {
                     $user = unserialize($_SESSION["birdibeuk_user"]);
-                    $this->idjoueur = $user->id;
+                    $this->AVENTURIER_USER_ID = $user->id;
                 }
             }
         }
         
         $db = getConnexionDB();
-        $requete = "UPDATE aventurier SET NOM = '".str_replace("'","''",$this->NOM)."',idjoueur = ".$this->idjoueur.", SEXE = '".$this->SEXE."', ORIGINE_ID = ".$this->ORIGINE_ID.", 
-        METIER_ID = ".$this->METIER_ID.", EV = ".$this->EV.", EA = ".$this->EA.", COU = ".$this->COU.", `INT` = ".$this->INT.", CHA = ".$this->CHA.", 
-        AD = ".$this->AD.", FO = ".$this->FO.", AT = ".$this->AT.", PRD = ".$this->PRD.", XP = ".$this->XP.", DESTIN = ".$this->DESTIN.", 
-        `OR` = ".$this->OR.", ARGENT = ".$this->ARGENT.", CUIVRE = ".$this->CUIVRE.", NIVEAU = ".$this->NIVEAU.", `TYPE` = ".$this->type." ,
-        MAGIEPHYS = ".$this->MAGIEPHYS.", MAGIEPSY = ".$this->MAGIEPSY.", RESISTMAG = ".$this->RESISTMAG.", ID_TYPEMAGIE = ".
-        $this->ID_TYPEMAGIE.", ID_DIEU = ".$this->ID_DIEU.", PR_MAX = ".$this->PR_MAX.",PR = ".$this->PR.", codeacces = '".$this->codeacces."', bonus_degat = ".$this->bonus_degat.", image_url='".$this->image_url."',
-        autre_metier = '".str_replace("'","''",$this->autre_metier)."', description = '".str_replace("'","''",$this->description)."',
-        evactuel = ".$this->evactuel.", eaactuel = ".$this->eaactuel."        
-        
-        WHERE ID = ".$this->ID;
+        $requete = "UPDATE aventurier SET 
+        NOM = '".str_replace("'","''",$this->NOM)."',
+        idjoueur = ".$this->idjoueur.", 
+        SEXE = '".$this->SEXE."', 
+        ORIGINE_ID = ".$this->ORIGINE_ID.", 
+        METIER_ID = ".$this->METIER_ID.", 
+        EV = ".$this->EV.", 
+        EA = ".$this->EA.", 
+        COU = ".$this->COU.", 
+        `INT` = ".$this->INT.", 
+        CHA = ".$this->CHA.", 
+        AD = ".$this->AD.", 
+        FO = ".$this->FO.", 
+        AT = ".$this->AT.", 
+        PRD = ".$this->AVENTURIER_PRD.", 
+        XP = ".$this->XP.", 
+        DESTIN = ".$this->DESTIN.", 
+        `OR` = ".$this->OR.", 
+        ARGENT = ".$this->ARGENT.", 
+        CUIVRE = ".$this->CUIVRE.", 
+        NIVEAU = ".$this->NIVEAU.", 
+        `TYPE` = ".$this->type." ,
+        MAGIEPHYS = ".$this->MAGIEPHYS.", 
+        MAGIEPSY = ".$this->MAGIEPSY.", 
+        RESISTMAG = ".$this->RESISTMAG.", 
+        ID_TYPEMAGIE = ".$this->ID_TYPEMAGIE.", 
+        ID_DIEU = ".$this->ID_DIEU.", 
+        PR_MAX = ".$this->AVENTURIER_PR_MAX.",
+        PR = ".$this->AVENTURIER_PR.", 
+        codeacces = '".$this->codeacces."', 
+        bonus_degat = ".$this->bonus_degat.", 
+        image_url='".$this->image_url."',
+        autre_metier = '".str_replace("'","''",$this->autre_metier)."', 
+        description = '".str_replace("'","''",$this->description)."',
+        evactuel = ".$this->evactuel.", 
+        eaactuel = ".$this->eaactuel."
+        WHERE AVENTURIER_ID = ".$this->AVENTURIER_ID;
         
         $stmt = $db->prepare($requete);
         $stmt->execute();
         
+        //On supprime les anciennes competences de l'aventurier
         $requete = "DELETE FROM lien_aventurier_competence where ID_AVENTURIER = :ID_AVENTURIER";    
         $stmt = $db->prepare($requete);
         $stmt->bindParam(':ID_AVENTURIER', $this->ID);
         $stmt->execute();
-                    
+        
+        //On ajoute les nouvelles competences de l'aventurier
         foreach($this->COMPETENCESCHOISIES as $competence)
         {
             if($competence->ID != "" && $competence->ID != 0)
@@ -737,11 +969,13 @@ class Aventurier
             }
         }
         
+        //On supprime l'ancien equipement de l'aventurier
         $requete = "DELETE FROM lien_aventurier_equipement where ID_AVENTURIER = :ID_AVENTURIER";    
         $stmt = $db->prepare($requete);
         $stmt->bindParam(':ID_AVENTURIER', $this->ID);
         $stmt->execute();
         
+        //On ajoute le nouvel equipement de l'aventurier
         foreach($this->equipements as $equipement)
         {
             for($a=0;$a<$equipement->nombre;$a++)
@@ -753,11 +987,13 @@ class Aventurier
             }
         }
         
+        //On supprime l'ancien armement de l'aventurier
         $requete = "DELETE FROM lien_aventurier_arme where ID_AVENTURIER = :ID_AVENTURIER";    
         $stmt = $db->prepare($requete);
         $stmt->bindParam(':ID_AVENTURIER', $this->ID);
         $stmt->execute();
         
+        //On ajoute le nouvel armement de l'aventurier
         foreach($this->armes as $arme)
         {
             $requete = "INSERT INTO lien_aventurier_arme (id_aventurier, id_arme) VALUES (".$this->ID.",".$arme->ID.")";  
@@ -766,11 +1002,13 @@ class Aventurier
             $stmt->execute();
         }
         
+        //On supprime les anciennes protections de l'aventurier
         $requete = "DELETE FROM lien_aventurier_protection where ID_AVENTURIER = :ID_AVENTURIER";    
         $stmt = $db->prepare($requete);
         $stmt->bindParam(':ID_AVENTURIER', $this->ID);
         $stmt->execute();
         
+        //On ajoute les nouvelles protections de l'aventurier
         foreach($this->protections as $protection)
         {
             $requete = "INSERT INTO lien_aventurier_protection (id_aventurier, id_protection) VALUES (".$this->ID.",".$protection->ID.")";  
@@ -837,7 +1075,7 @@ class Aventurier
         $this->AD = $ligne['AD']; 
         $this->FO = $ligne['FO']; 
         $this->AT = $ligne['AT']; 
-        $this->PRD = $ligne['PRD']; 
+        $this->AVENTURIER_PRD = $ligne['PRD']; 
         $this->XP = $ligne['XP']; 
         $this->DESTIN = $ligne['DESTIN']; 
         $this->OR = $ligne['OR']; 
@@ -856,8 +1094,8 @@ class Aventurier
         $this->RESISTMAG = $ligne['RESISTMAG'];
         $this->ID_TYPEMAGIE = $ligne['ID_TYPEMAGIE'];
         $this->ID_DIEU = $ligne['ID_DIEU'];
-        $this->PR_MAX = $ligne['PR_MAX'];
-        $this->PR = $ligne['PR'];
+        $this->AVENTURIER_PR_MAX = $ligne['PR_MAX'];
+        $this->AVENTURIER_PR = $ligne['PR'];
         
         $this->codeacces = $ligne['codeacces'];
         $this->bonus_degat = $ligne['bonus_degat'];
@@ -1100,11 +1338,11 @@ class Aventurier
     public function determineCaracs()
     {
         $this->EV = $this->ORIGINE->EV;
-        $this->PR_MAX = $this->ORIGINE->PRMAX;
+        $this->AVENTURIER_PR_MAX = $this->ORIGINE->PRMAX;
         
         if($this->METIER->PRMAX != 0 && (($this->METIER->PRMAX < $this->ORIGINE->PRMAX) || ($this->ORIGINE->PRMAX == 0)))
         {
-            $this->PR_MAX = $this->METIER->PRMAX;
+            $this->AVENTURIER_PR_MAX = $this->METIER->PRMAX;
         }
         
         if($this->METIER->NOM == "Guerrier")
@@ -1141,28 +1379,28 @@ class Aventurier
         $this->EA = $this->METIER->EA;
         
         $this->AT = 8;
-        $this->PRD = 10;
+        $this->AVENTURIER_PRD = 10;
         if($this->ORIGINE->NOM == "Barbare" || $this->ORIGINE->NOM == "Ogre" || $this->ORIGINE->NOM == "Orque")
         {
             $this->AT = $this->AT+1;
-            $this->PRD = $this->PRD-1;
+            $this->AVENTURIER_PRD = $this->AVENTURIER_PRD-1;
         }
         if($this->ORIGINE->NOM == "Gnome")
         {
             $this->AT = $this->AT+2;
-            $this->PRD = $this->PRD-2;
+            $this->AVENTURIER_PRD = $this->AVENTURIER_PRD-2;
         }
         
         if($this->METIER->NOM == "Assassin")
         {
             $this->AT = 11;
-             $this->PRD = 8;
+             $this->AVENTURIER_PRD = 8;
         }
         
         if($this->METIER->NOM == "Bourgeois")
         {
             $this->AT = 7;
-            $this->PRD = 9;
+            $this->AVENTURIER_PRD = 9;
         }
     }
 

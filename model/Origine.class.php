@@ -8,7 +8,7 @@
  */
 
  /**
- * @brief La classe Origine et ses méthodes.
+ * @brief La classe Origine.
  *
  * Cette classe permet la gestion des origines et des compétences 
  * liées à ces origines. Elle permet aussi de determiner si un 
