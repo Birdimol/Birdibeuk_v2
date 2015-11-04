@@ -160,21 +160,6 @@ class Aventurier
      * 0 = pas de Dieu
      */
     private $AVENTURIER_DIEU_ID;
-        
-    /**
-     * @brief array : Tableau contenant toutes les compétences choisies par l'Aventurier en plus de ses compétences liées
-     */
-    private $competences_choisies;
-    
-    /**
-     * @brief array : Tableau contenant toutes les compétences liées à l'Aventurier de par son origine et son métier
-     */
-    private $competences_liees;
-    
-    /**
-     * @brief array : Tableau contenant toutes les compétences de l'Aventurier
-     */
-    private $competences;
     
     /**
      * @brief int : Protection maximum de l'Aventurier en fonction de son origine et métier
@@ -190,21 +175,6 @@ class Aventurier
      * @brief string : Code d'accès à l'Aventurier pour modifier ses données
      */
     private $AVENTURIER_CODEACCES;
-    
-    /**
-     * @brief array : Tableau contenant toutes les armes de l'Aventurier
-     */
-    private $armes;
-    
-    /**
-     * @brief array : Tableau contenant toutes les protections de l'Aventurier
-     */
-    private $protections;
-    
-    /**
-     * @brief array : Tableau contenant toutes les equipement de l'Aventurier
-     */
-    private $equipements;
     
     /**
      * @brief int : Score de bonus aux dégats de l'Aventurier
@@ -247,6 +217,36 @@ class Aventurier
      * @brief Origine : Origine de l'Aventurier
      */
     private $origine;
+    
+    /**
+     * @brief array : Tableau contenant toutes les armes de l'Aventurier
+     */
+    private $armes;
+    
+    /**
+     * @brief array : Tableau contenant toutes les protections de l'Aventurier
+     */
+    private $protections;
+    
+    /**
+     * @brief array : Tableau contenant toutes les equipement de l'Aventurier
+     */
+    private $equipements;
+    
+    /**
+     * @brief array : Tableau contenant toutes les compétences choisies par l'Aventurier en plus de ses compétences liées
+     */
+    private $competences_choisies;
+    
+    /**
+     * @brief array : Tableau contenant toutes les compétences liées à l'Aventurier de par son origine et son métier
+     */
+    private $competences_liees;
+    
+    /**
+     * @brief array : Tableau contenant toutes les compétences de l'Aventurier
+     */
+    private $competences;
     
     /**
      * @brief S'assure que l'Aventurier est prêt pour l'affichage.
@@ -334,11 +334,11 @@ class Aventurier
         }
         else if($var == "dieu")
         {
-            if(!is_object($this->DIEU))
+            if(!is_object($this->dieu))
             {
-                $this->DIEU = new Dieu($this->ID_DIEU);
+                $this->dieu = new dieu($this->ID_DIEU);
             }
-            return $this->DIEU->NOM;
+            return $this->dieu->NOM;
         }
         else if(property_exists("Aventurier",$var))
         {
@@ -362,23 +362,23 @@ class Aventurier
      */
     public function __set($var, $value)
     {
+        //si on modifie l'origine, on en profite pour recharger l'objet Origine de l'aventurier
         if($var == "ORIGINE_ID")
         {
             $this->ORIGINE_ID = $value;
-            $origine = new Origine($value);
-            $this->ORIGINE = $origine;
+            $this->origine = new Origine($value);
         }
+        //si on modifie le metier, on en profite pour recharger l'objet Metier de l'aventurier
         else if($var == "METIER_ID")
         {
             $this->METIER_ID = $value;
-            $metier = new Metier($value);
-            $this->METIER = $metier;
+            $this->metier = new Metier($value);
         }
+        //si on modifie le dieu, on en profite pour recharger l'objet Dieu de l'aventurier        
         else if($var == "DIEU_ID")
         {
             $this->DIEU_ID = $value;
-            $dieu = new Dieu($value);
-            $this->DIEU = $dieu;
+            $this->dieu = new Dieu($value);
         }
         else
         {
@@ -661,7 +661,7 @@ class Aventurier
      */
     private function get_requete_ajout()
     {
-        $requete = "INSERT INTO aventurier (
+        $requete = "INSERT INTO ".PREFIX_DB."aventurier (
             AVENTURIER_NOM, 
             AVENTURIER_SEXE, 
             AVENTURIER_ORIGINE_ID, 
@@ -738,11 +738,58 @@ class Aventurier
     }
     
     /**
+     * @brief Génère la requete de modification d'un Aventurier en DB
+     * 
+     * @return $requete La requete générée
+     */
+    private function get_requete_modification()
+    {
+        $requete = "UPDATE ".PREFIX_DB."aventurier 
+            SET AVENTURIER_NOM = :AVENTURIER_NOM, 
+            AVENTURIER_SEXE = :AVENTURIER_SEXE, 
+            AVENTURIER_ORIGINE_ID = :AVENTURIER_ORIGINE_ID, 
+            AVENTURIER_METIER_ID = :AVENTURIER_METIER_ID, 
+            AVENTURIER_EV = :AVENTURIER_EV, 
+            AVENTURIER_EA = :AVENTURIER_EA, 
+            AVENTURIER_COU = :AVENTURIER_COU, 
+            AVENTURIER_INT = :AVENTURIER_INT, 
+            AVENTURIER_CHA = :AVENTURIER_CHA, 
+            AVENTURIER_AD = :AVENTURIER_AD, 
+            AVENTURIER_FO = :AVENTURIER_FO, 
+            AVENTURIER_AT = :AVENTURIER_AT, 
+            AVENTURIER_PRD = :AVENTURIER_PRD, 
+            AVENTURIER_XP = :AVENTURIER_XP, 
+            AVENTURIER_DESTIN = :AVENTURIER_DESTIN, 
+            AVENTURIER_OR = :AVENTURIER_OR, 
+            AVENTURIER_ARGENT = :AVENTURIER_ARGENT, 
+            AVENTURIER_CUIVRE = :AVENTURIER_CUIVRE,
+            AVENTURIER_NIVEAU = :AVENTURIER_NIVEAU, 
+            AVENTURIER_USER_ID = :AVENTURIER_USER_ID, 
+            AVENTURIER_TYPE = :AVENTURIER_TYPE,
+            AVENTURIER_MAGIEPHYS = :AVENTURIER_MAGIEPHYS, 
+            AVENTURIER_MAGIEPSY = :AVENTURIER_MAGIEPSY, 
+            AVENTURIER_RESISTMAG = :AVENTURIER_RESISTMAG, 
+            AVENTURIER_TYPEMAGIE_ID = :AVENTURIER_TYPEMAGIE_ID, 
+            AVENTURIER_DIEU_ID = :AVENTURIER_DIEU_ID, 
+            AVENTURIER_PR_MAX = :AVENTURIER_PR_MAX,
+            AVENTURIER_codeacces = :AVENTURIER_codeacces,
+            AVENTURIER_PR = :AVENTURIER_PR,
+            AVENTURIER_BONUS_DEGAT = :AVENTURIER_BONUS_DEGAT,
+            AVENTURIER_image_url = :AVENTURIER_image_url, 
+            AVENTURIER_autre_metier = :AVENTURIER_autre_metier,
+            AVENTURIER_EVACTUEL = :AVENTURIER_EVACTUEL,
+            AVENTURIER_EAACTUEL = :AVENTURIER_EAACTUEL, 
+            AVENTURIER_description = :AVENTURIER_description";
+            
+        return $requete;
+    }    
+    
+    /**
      * @brief Bind les données de Aventurier à une requete PDO préparée.
      * 
      * @return void
      */
-    private bindParam($sth)
+    private function bindParam($sth, $requete)
     {
         $sth->bindParam(':AVENTURIER_NOM',$this->AVENTURIER_NOM,PDO::PARAM_STR);
         $sth->bindParam(':AVENTURIER_SEXE',$this->AVENTURIER_SEXE,PDO::PARAM_STR);
@@ -779,6 +826,10 @@ class Aventurier
         $sth->bindParam(':AVENTURIER_EVACTUEL',$this->AVENTURIER_EVACTUEL,PDO::PARAM_INT);
         $sth->bindParam(':AVENTURIER_EAACTUEL', ,$this->AVENTURIER_EAACTUEL,PDO::PARAM_INT);
         $sth->bindParam(':AVENTURIER_description',$this->AVENTURIER_description,PDO::PARAM_STR);
+        if(strpos($requete,":AVENTURIER_ID") !== false)
+        {
+            $sth->bindParam(':AVENTURIER_ID',$this->AVENTURIER_ID,PDO::PARAM_INT);
+        }
     }
     
     /**
@@ -910,45 +961,10 @@ class Aventurier
         }
         
         $db = getConnexionDB();
-        $requete = "UPDATE aventurier SET 
-        NOM = '".str_replace("'","''",$this->NOM)."',
-        idjoueur = ".$this->idjoueur.", 
-        SEXE = '".$this->SEXE."', 
-        ORIGINE_ID = ".$this->ORIGINE_ID.", 
-        METIER_ID = ".$this->METIER_ID.", 
-        EV = ".$this->EV.", 
-        EA = ".$this->EA.", 
-        COU = ".$this->COU.", 
-        `INT` = ".$this->INT.", 
-        CHA = ".$this->CHA.", 
-        AD = ".$this->AD.", 
-        FO = ".$this->FO.", 
-        AT = ".$this->AT.", 
-        PRD = ".$this->AVENTURIER_PRD.", 
-        XP = ".$this->XP.", 
-        DESTIN = ".$this->DESTIN.", 
-        `OR` = ".$this->OR.", 
-        ARGENT = ".$this->ARGENT.", 
-        CUIVRE = ".$this->CUIVRE.", 
-        NIVEAU = ".$this->NIVEAU.", 
-        `TYPE` = ".$this->type." ,
-        MAGIEPHYS = ".$this->MAGIEPHYS.", 
-        MAGIEPSY = ".$this->MAGIEPSY.", 
-        RESISTMAG = ".$this->RESISTMAG.", 
-        ID_TYPEMAGIE = ".$this->ID_TYPEMAGIE.", 
-        ID_DIEU = ".$this->ID_DIEU.", 
-        PR_MAX = ".$this->AVENTURIER_PR_MAX.",
-        PR = ".$this->AVENTURIER_PR.", 
-        codeacces = '".$this->codeacces."', 
-        bonus_degat = ".$this->bonus_degat.", 
-        image_url='".$this->image_url."',
-        autre_metier = '".str_replace("'","''",$this->autre_metier)."', 
-        description = '".str_replace("'","''",$this->description)."',
-        evactuel = ".$this->evactuel.", 
-        eaactuel = ".$this->eaactuel."
-        WHERE AVENTURIER_ID = ".$this->AVENTURIER_ID;
+        $requete = get_requete_modification();
         
         $stmt = $db->prepare($requete);
+        $this->bindParam($stmt);
         $stmt->execute();
         
         //On supprime les anciennes competences de l'aventurier
@@ -1020,72 +1036,71 @@ class Aventurier
         
     }
 
+    /**
+     * @brief Supprime l'Aventurier en DB.
+     *
+     * Supprime également ses armes(Arme), protections(Protection), équipements(Equipement) et compétences(Competence).
+     * 
+     * @return  void
+     */
     public function supprimer()
     {
         $db = getConnexionDB();
         
-        $requete = "DELETE FROM lien_aventurier_arme WHERE ID_AVENTURIER = ".$this->ID;        
+        //supprime les liens avec les armes
+        $requete = "DELETE FROM ".PREFIX_DB."lien_aventurier_arme WHERE AVENTURIER_ID = ".$this->AVENTURIER_ID;        
         $stmt = $db->prepare($requete);
         $stmt->execute();
         
-        $requete = "DELETE FROM lien_aventurier_competence WHERE ID_AVENTURIER = ".$this->ID;        
+        //supprime les liens avec les competences
+        $requete = "DELETE FROM ".PREFIX_DB."lien_aventurier_competence WHERE AVENTURIER_ID = ".$this->AVENTURIER_ID;        
         $stmt = $db->prepare($requete);
         $stmt->execute();
         
-        $requete = "DELETE FROM lien_aventurier_equipement WHERE ID_AVENTURIER = ".$this->ID;        
+        //supprime les liens avec les équipements
+        $requete = "DELETE FROM ".PREFIX_DB."lien_aventurier_equipement WHERE AVENTURIER_ID = ".$this->AVENTURIER_ID;        
         $stmt = $db->prepare($requete);
         $stmt->execute();
         
-        $requete = "DELETE FROM lien_aventurier_protection WHERE ID_AVENTURIER = ".$this->ID;        
+        //supprime les liens avec les protections
+        $requete = "DELETE FROM ".PREFIX_DB."lien_aventurier_protection WHERE AVENTURIER_ID = ".$this->AVENTURIER_ID;        
         $stmt = $db->prepare($requete);
         $stmt->execute();
         
-        $requete = "DELETE FROM lien_aventurier_precieux WHERE ID_AVENTURIER = ".$this->ID;        
-        $stmt = $db->prepare($requete);
-        $stmt->execute();
-        
-        $requete = "DELETE FROM aventurier WHERE ID = ".$this->ID;        
+        //supprime l'aventurier
+        $requete = "DELETE FROM ".PREFIX_DB."aventurier WHERE AVENTURIER_ID = ".$this->AVENTURIER_ID;        
         $stmt = $db->prepare($requete);
         $stmt->execute();
     }
 
-    //get_data_from_db
-    public function loadFromDB($id)
+    /**
+     * @brief Récupère un Aventurier en DB 
+     *
+     * Récupère un Aventurier en DB et charge l'objet Aventurier avec les données trouvées.
+     * @param $AVENTURIER_ID l'AVENTURIER_ID en DB
+     * @return  void
+     */
+    public function loadFromDB($AVENTURIER_ID)
     {
         $db = getConnexionDB();
-        $requete = "SELECT * FROM aventurier WHERE ID = ".$id;    
+        $requete = "SELECT * FROM ".PREFIX_DB."aventurier WHERE AVENTURIER_ID = ".$AVENTURIER_ID;    
         $stmt = $db->prepare($requete);
         $stmt->execute();
     
         $ligne = $stmt->fetch(PDO::FETCH_ASSOC);
         
+        foreach($ligne as $key=>$value)
+        {
+            if(isset($this->$key))
+            {
+                $this->$key = $value;
+            }
+        }
+        
         $this->COMPETENCESCHOISIES = array();
         $this->COMPETENCESLIEES = array();
      
-        $this->ID = $ligne['ID']; 
-        $this->NOM = $ligne['NOM']; 
-        $this->SEXE = $ligne['SEXE']; 
-        $this->ORIGINE_ID = $ligne['ORIGINE_ID']; 
-        $this->METIER_ID = $ligne['METIER_ID']; 
-        $this->EV = $ligne['EV']; 
-        $this->EA = $ligne['EA']; 
-        $this->COU = $ligne['COU']; 
-        $this->INT = $ligne['INT']; 
-        $this->CHA = $ligne['CHA']; 
-        $this->AD = $ligne['AD']; 
-        $this->FO = $ligne['FO']; 
-        $this->AT = $ligne['AT']; 
-        $this->AVENTURIER_PRD = $ligne['PRD']; 
-        $this->XP = $ligne['XP']; 
-        $this->DESTIN = $ligne['DESTIN']; 
-        $this->OR = $ligne['OR']; 
-        $this->ARGENT = $ligne['ARGENT']; 
-        $this->CUIVRE = $ligne['CUIVRE']; 
-        $this->NIVEAU = $ligne['NIVEAU'];
-        $this->idjoueur = $ligne['idjoueur'];
-        $this->type = $ligne['type'];
-        $this->autre_metier = $ligne['autre_metier'];
-        
+               
         $this->METIER = new METIER($this->METIER_ID);
         $this->ORIGINE = new ORIGINE($this->ORIGINE_ID);
         
