@@ -4,6 +4,59 @@
     src: url('../font/BENGUIAB.TTF');
 }
 
+.texte_grand
+{
+    font-size:16px;
+}
+
+.index_table
+{
+    display:inline-block;
+    width:30px;
+    height:30px;
+    border:1px #3E404F solid;
+    border-bottom:3px #3E404F solid;
+    padding:5px;
+    background-color:#D5D5BD;
+    cursor:pointer;
+    text-align:center;
+}
+
+.index_table_current
+{
+    width:30px;
+    height:30px;
+    display:inline-block;
+    border:1px #900000 solid;
+    color:#900000;
+    padding:5px;
+    background-color:#D5D5BD;
+    cursor:pointer;
+    text-align:center;
+}
+
+.index_table:hover
+{
+    color:#900000;
+    cursor:pointer;
+}
+
+.ligne_table_selectionnable
+{
+    cursor:pointer;
+}
+
+.ligne_table_selectionnable:hover
+{
+    color:#900000;
+    background-color:#D5D5BD;
+}
+
+.centre
+{
+    text-align:center;
+}
+
 a, a:visited
 {
     color:#3E404F;
@@ -61,6 +114,45 @@ body
     padding-right:20px;
     float:left;
     cursor:pointer;
+}
+
+table.carac
+{
+    width:250px;
+    text-align:center;
+}
+
+table.basique
+{
+    width:100%;
+}
+
+table.basique tbody tr td
+{
+    border:1px #3E404F solid;
+    padding:10px;
+}
+
+table.basique thead tr th
+{
+    background-color:#D5D5BD;
+    border:1px #3E404F solid;
+    padding:10px;
+}
+
+table.carac tbody tr td
+{
+    width:50px;
+    border:1px #3E404F solid;
+    
+}
+
+table.carac thead tr th
+{
+    width:50px;
+    background-color:#D5D5BD;
+    border:1px #3E404F solid;
+    text-align:center;
 }
 
 .element_menu:hover

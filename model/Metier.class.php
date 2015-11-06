@@ -167,7 +167,10 @@ class Metier
     {							
         foreach($array as $key=>$value)
         {
-            $this->$key = $value;
+            if(property_exists("Metier",$key))
+            {
+                $this->$key = $value;
+            }
         }
     }
 

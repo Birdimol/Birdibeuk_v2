@@ -48,8 +48,22 @@ class Origine
     private $competences_a_choisir;
 
     //constructeur
-    public function __construct($ID_envoye = '', $NOM_envoye = '', $EV_envoye = '', $AT_envoye = '', $PRD_envoye = '', $FOMIN_envoye = '', $FOMAX_envoye = '', $ADMIN_envoye = '', $ADMAX_envoye = '', $INTMIN_envoye = '', $INTMAX_envoye = '', $CHAMIN_envoye = '', $CHAMAX_envoye = '', $COUMIN_envoye = '', $COUMAX_envoye = '', $RESTRICTION_envoye = '', $BONUS_envoye = '', $MAGIE_envoye = '', $PRMAX_envoye = '', $BOUCLIER_envoye = '', $JET_envoye = '', $MALADIE_envoye = '', $PETITE_TAILLE_envoye = '', $PR_MAX_envoye = '')
+    public function __construct($parametre = null)
     {
+        //Le paramètre envoyé est-il vide ?
+        if(is_null($parametre) || empty($parametre))
+        {
+            //Si le paramètre envoyé est vide l'objet reste vide aussi.
+        }
+        else if(is_array($parametre))
+        {
+            $this->loadFromArray($parametre);               
+        }
+        else if(is_numeric($parametre))
+        {
+            $this->loadFromDB($parametre);
+        }
+        /*
         //si ID
         if(!empty($ID_envoye) && empty($NOM_envoye))
         {
@@ -105,6 +119,7 @@ class Origine
                 }
             }
         }
+        */
     }
 
     //get
@@ -138,12 +153,14 @@ class Origine
         $this->$var = $value;
     }	
 
-    //set all from form
-    public function set_all_from_form($post)
-    {							
-        foreach($post as $key=>$value)
+    public function loadFromArray($array)
+    {
+        foreach($array as $key=>$value)
         {
-            $this->$key = $value;
+            if(property_exists("Origine",$key))
+            {
+                $this->$key = $value;
+            }
         }
     }
 
@@ -330,7 +347,7 @@ class Origine
     
     public function __toString()
     {
-        return $this->NOM;
+        return $this->ORIGINE_NOM;
     }
 
     public function debug()

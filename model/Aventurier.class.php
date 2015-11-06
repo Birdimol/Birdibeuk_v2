@@ -438,7 +438,7 @@ class Aventurier
      * 
      * @return  Tableau<Aventurier>
      */
-    public static function Lister($ordre = "AVENTURIER_NOM ASC",$nom="")
+    public static function Lister($ordre = "AVENTURIER_NOM ASC",$nom="", $limit = "")
     {        
         //Si dans l'ordre, on a reçu l'id metier ou origine, il ne faut
         //pas trier sur l'ID mais bien sur le nom de l'origine ou du metier.
@@ -448,7 +448,7 @@ class Aventurier
         $ordre = strtolower($ordre);
         
         $db = DatabaseManager::getDb();
-        $requete = "SELECT ".PREFIX_DB."aventurier.*,".PREFIX_DB."metier.* 
+        $requete = "SELECT ".PREFIX_DB."aventurier.*, ".PREFIX_DB."metier.*, ".PREFIX_DB."origine.* 
             FROM ".PREFIX_DB."aventurier 
             join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = AVENTURIER_ORIGINE_ID 
             join ".PREFIX_DB."metier on ".PREFIX_DB."metier.METIER_ID = AVENTURIER_METIER_ID ";
@@ -456,29 +456,74 @@ class Aventurier
         //si on a envoyé un nom, on balance le filtre dans la requete.
         if(!empty($nom))
         {
-            $requete .= " WHERE ".PREFIX_DB."aventurier.AVENTURIER_NOM LIKE ':nom%'";
+            $requete .= " WHERE ".PREFIX_DB."aventurier.AVENTURIER_NOM LIKE :nom";
         }
 
         $requete .= " ORDER BY ".$ordre;
+        
+        if($limit != "")
+        {
+            $requete .= " limit ".(($limit-1)*100).",".(($limit)*100);
+        }
 
         $tableau = array();
         $stmt = $db->prepare($requete);
-        if(!empty($nom))
-        {
-            $sth->bindParam(':nom', $nom, PDO::PARAM_STR);
-        }
+        $nom = $nom."%";
+        $stmt->bindParam(':nom', $nom);        
         
-        if($stmt->execute())
+        try
         {
+            $stmt->execute();
             while ($rs = $stmt->fetch(PDO::FETCH_ASSOC))
             {
                 //on 
                 $temp = new Aventurier($rs);       
-                $tableau[] =$temp;
+                $tableau[] = $temp;
             }
+            return $tableau;
+        }
+        catch(Exception $e)
+        {
+            echo 'Tout ne s\'est pas bien passé, voir les erreurs ci-dessous<br />';
+            echo 'Erreur : '.$e->getMessage().'<br />';
+            echo 'N° : '.$e->getCode();
+            return array();
+        }
+    }
+    
+    /**
+     * @brief Compte tous les aventuriers éventuellement filtrés par nom
+     *
+     * @param   $nom   définit quel filtre utiliser sur le nom 
+     * 
+     * @return  int compte
+     */
+    public static function Compter($nom="")
+    {        
+        if($nom != "")
+        {
+            $nom = $nom."%";
         }
         
-        return $tableau;
+        $db = DatabaseManager::getDb();
+        $requete = "SELECT COUNT(*) as compte
+            FROM ".PREFIX_DB."aventurier";
+
+        if($nom != ""){$requete .= " where AVENTURIER_NOM LIKE :nom ";}
+
+        $stmt = $db->prepare($requete);        
+
+        if($nom != ""){$stmt->bindParam(':nom', $nom);} 
+
+        if($stmt->execute())
+        {
+            $rs = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $rs["compte"];
+        }
+        else
+        {
+            return 0;
+        }
     }
     
     /**
@@ -824,7 +869,7 @@ class Aventurier
         $sth->bindParam(':AVENTURIER_image_url', $this->AVENTURIER_image_url,PDO::PARAM_STR);
         $sth->bindParam(':AVENTURIER_autre_metier',$this->AVENTURIER_autre_metier,PDO::PARAM_STR);
         $sth->bindParam(':AVENTURIER_EVACTUEL',$this->AVENTURIER_EVACTUEL,PDO::PARAM_INT);
-        $sth->bindParam(':AVENTURIER_EAACTUEL', ,$this->AVENTURIER_EAACTUEL,PDO::PARAM_INT);
+        $sth->bindParam(':AVENTURIER_EAACTUEL',$this->AVENTURIER_EAACTUEL,PDO::PARAM_INT);
         $sth->bindParam(':AVENTURIER_description',$this->AVENTURIER_description,PDO::PARAM_STR);
         if(strpos($requete,":AVENTURIER_ID") !== false)
         {
@@ -960,7 +1005,7 @@ class Aventurier
             }
         }
         
-        $db = getConnexionDB();
+        $db = DatabaseManager::getDb();
         $requete = get_requete_modification();
         
         $stmt = $db->prepare($requete);
@@ -1082,8 +1127,12 @@ class Aventurier
      */
     public function loadFromDB($AVENTURIER_ID)
     {
-        $db = getConnexionDB();
-        $requete = "SELECT * FROM ".PREFIX_DB."aventurier WHERE AVENTURIER_ID = ".$AVENTURIER_ID;    
+        $db = DatabaseManager::getDb();
+        $requete = "SELECT * 
+            FROM ".PREFIX_DB."aventurier 
+            join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = AVENTURIER_ORIGINE_ID 
+            join ".PREFIX_DB."metier on ".PREFIX_DB."metier.METIER_ID = AVENTURIER_METIER_ID 
+            WHERE AVENTURIER_ID = ".$AVENTURIER_ID;    
         $stmt = $db->prepare($requete);
         $stmt->execute();
     
@@ -1091,41 +1140,25 @@ class Aventurier
         
         foreach($ligne as $key=>$value)
         {
-            if(isset($this->$key))
+            if(property_exists("Aventurier",$key))
             {
                 $this->$key = $value;
             }
         }
         
-        $this->COMPETENCESCHOISIES = array();
-        $this->COMPETENCESLIEES = array();
+        $this->competences_choisies = array();
+        $this->competences_liees = array();
      
-               
-        $this->METIER = new METIER($this->METIER_ID);
-        $this->ORIGINE = new ORIGINE($this->ORIGINE_ID);
+        $this->metier = new METIER($ligne);
+        $this->origine = new ORIGINE($ligne);        
+        //$this->DIEU = new Dieu($this->ID_DIEU);
         
-        $this->MAGIEPHYS = $ligne['MAGIEPHYS'];
-        $this->MAGIEPSY = $ligne['MAGIEPSY'];
-        $this->RESISTMAG = $ligne['RESISTMAG'];
-        $this->ID_TYPEMAGIE = $ligne['ID_TYPEMAGIE'];
-        $this->ID_DIEU = $ligne['ID_DIEU'];
-        $this->AVENTURIER_PR_MAX = $ligne['PR_MAX'];
-        $this->AVENTURIER_PR = $ligne['PR'];
-        
-        $this->codeacces = $ligne['codeacces'];
-        $this->bonus_degat = $ligne['bonus_degat'];
-        $this->image_url = $ligne['image_url'];
-        
-        $this->description = $ligne['description'];
-        $this->eaactuel = $ligne['eaactuel'];
-        $this->evactuel = $ligne['evactuel'];
-        
-        $this->DIEU = new Dieu($this->ID_DIEU);
-        
+        /*
         $this->majCompetenceDB();
         $this->majEquipementDB();
         $this->majArmeDB();
         $this->majProtectionDB();
+        */
     }
     
     public function ajouterCompetence($ID_COMPETENCE)
