@@ -332,6 +332,14 @@ class Aventurier
             
             return $this->MAGIE->NOM;
         }
+        else if($var == "competences")
+        {
+            if(empty($this->competences))
+            {
+                $this->majCompetenceDB();
+            }
+            return $this->competences;
+        }
         else if($var == "dieu")
         {
             if(!is_object($this->dieu))
@@ -889,7 +897,7 @@ class Aventurier
         $this->verifieValeurs();
         $this->calculProtection();
         
-        $db = getConnexionDB();
+        $db = DatabaseManager::getDb();
         try
         {
             $db->beginTransaction();
@@ -1090,7 +1098,7 @@ class Aventurier
      */
     public function supprimer()
     {
-        $db = getConnexionDB();
+        $db = DatabaseManager::getDb();
         
         //supprime les liens avec les armes
         $requete = "DELETE FROM ".PREFIX_DB."lien_aventurier_arme WHERE AVENTURIER_ID = ".$this->AVENTURIER_ID;        
@@ -1128,6 +1136,7 @@ class Aventurier
     public function loadFromDB($AVENTURIER_ID)
     {
         $db = DatabaseManager::getDb();
+
         $requete = "SELECT * 
             FROM ".PREFIX_DB."aventurier 
             join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = AVENTURIER_ORIGINE_ID 
@@ -1263,10 +1272,13 @@ class Aventurier
     
     public function majCompetenceDB()
     {
-        $db = getConnexionDB();
+        $db = DatabaseManager::getDb();
         
-        $requete = "SELECT * FROM lien_aventurier_competence WHERE ID_AVENTURIER = ".$this->ID;  
-
+        $requete = "SELECT ".PREFIX_DB."competence.* 
+        FROM ".PREFIX_DB."lien_aventurier_competence 
+        join ".PREFIX_DB."competence on ".PREFIX_DB."lien_aventurier_competence.ID_COMPETENCE = ".PREFIX_DB."competence.COMPETENCE_ID
+        WHERE ID_AVENTURIER = ".$this->AVENTURIER_ID;  
+        
         $stmt = $db->prepare($requete);
         $stmt->execute();
         
@@ -1274,20 +1286,14 @@ class Aventurier
         
         while($ligne = $stmt->fetch(PDO::FETCH_ASSOC))
         {
-			/*
-			if($this->ID == 14)
-			{
-				echo "Aloha!";
-			}	
-			*/
-            $comp = new Competence($ligne["ID_COMPETENCE"]);
+            $comp = new Competence($ligne);
             $this->competences[] = $comp;
         }
     }
     
     public function majEquipementDB()
     {
-        $db = getConnexionDB();
+        $db = DatabaseManager::getDb();
         
         $requete = "SELECT * FROM lien_aventurier_equipement WHERE ID_AVENTURIER = ".$this->ID;  
         
@@ -1312,7 +1318,7 @@ class Aventurier
     
     public function majArmeDB()
     {
-        $db = getConnexionDB();
+        $db = DatabaseManager::getDb();
         
         $requete = "SELECT * FROM lien_aventurier_arme WHERE ID_AVENTURIER = ".$this->ID;  
         
@@ -1330,7 +1336,7 @@ class Aventurier
     
     public function majProtectionDB()
     {
-        $db = getConnexionDB();
+        $db = DatabaseManager::getDb();
         
         $requete = "SELECT * FROM lien_aventurier_protection WHERE ID_AVENTURIER = ".$this->ID;  
         
@@ -1366,7 +1372,7 @@ class Aventurier
             return;
         }
         
-        $db = getConnexionDB();
+        $db = DatabaseManager::getDb();
         
         $requete = "SELECT * FROM lien_aventurier_competence WHERE ID_AVENTURIER = ".$this->ID;  
         

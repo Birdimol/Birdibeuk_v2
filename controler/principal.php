@@ -10,14 +10,14 @@
     if(strpos($ctrl,"creation_aventurier") !== false)
     {
         inclure_controleur(__DIR__."/../controler/creation_aventurier/".$ctrl.".php");
-    }
-     else if(strpos($ctrl,"aventurier") !== false)
-    {
-        inclure_controleur(__DIR__."/../controler/aventurier/".$ctrl.".php");
-    }
+    }    
     else if(strpos($ctrl,"archives") !== false)
     {
         inclure_controleur(__DIR__."/../controler/archives/".$ctrl.".php");
+    }
+    else if(strpos($ctrl,"aventurier") !== false)
+    {
+        inclure_controleur(__DIR__."/../controler/aventurier/".$ctrl.".php");
     }
     else
     {
@@ -34,6 +34,7 @@
         else
         {
             //404
+            echo "'$file' introuvable.";
             include(__DIR__."/../view/404.php");
         }
     }    
