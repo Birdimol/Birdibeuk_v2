@@ -1,6 +1,6 @@
 <?php 
 /**
- * @file controler/aventurier/voir_aventurier.php 
+ * @file view/aventurier/voir_aventurier.php 
  * @brief Cette vue permet de voir les données d'un aventurier.
  * 
  * @author  Birdimol
@@ -9,12 +9,14 @@
  */
  ?>
 <div id='content'>
-    <h1 style='color:#900000;'><?php echo $aventurier->AVENTURIER_NOM;
+    <h1 style='color:#900000;font-size:400%;'><?php echo $aventurier->AVENTURIER_NOM;
         if($aventurier->AVENTURIER_IMAGE_URL != "")
         {
-            echo "<img src='".$aventurier->AVENTURIER_IMAGE_URL."' style='float:left; width:150px;border:1px #3E404F solid;margin-right:20px;margin-bottom:20px;' />";
+            echo "<img id='image_aventurier' src='".$aventurier->AVENTURIER_IMAGE_URL."' style='float:left; width:150px;border:1px #3E404F solid;margin-right:20px;margin-bottom:20px;' />";
         }
+        
     ?></h1>
+    
     <h2>
     <?php 
         echo $aventurier->origine." "; 
@@ -40,39 +42,22 @@
         Sexe : <?php echo $aventurier->AVENTURIER_SEXE;?>
     </div>
     <div style="clear:both;"></div>
-    <table class='basique' style='width:45%;float:right;max-width:300px;'>
-        <thead>
-            <tr>
-                <th  class='table_titre_2'>Compétences</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class='table_titre_1'>
-                    <?php 
-                        foreach($aventurier->competences as $competence)
-                        {
-                            echo "<span style='cursor:help;' title='".str_replace("'","&apos;",$competence->COMPETENCE_SPECIAL)."'>".$competence."</span><br>";
-                        }   
-                    ?>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+   <img style='float:right;' src='view/aventurier/graph_carac_principale.php?COU=<?php echo $aventurier->AVENTURIER_COU;?>&INT=<?php echo $aventurier->AVENTURIER_INT;?>&CHA=<?php echo $aventurier->AVENTURIER_CHA;?>&AD=<?php echo $aventurier->AVENTURIER_AD;?>&FO=<?php echo $aventurier->AVENTURIER_FO;?>'>
+                
     <table class='carac' style='width:65%;'>
-        <thead>
+        <thead>        
             <tr>
                 <th colspan='5' class='table_titre_2'>CARACTERISTIQUES PRINCIPALES</th>
             </tr>
-            <tr>
-                <th class='table_titre_1'>COURAGE<br>(COU)</th>
-                <th class='table_titre_1'>INTELLIGENCE<br>(INT)</th>
-                <th class='table_titre_1'>CHARISME<br>(CHA)</th>
-                <th class='table_titre_1'>ADRESSE<br>(AD)</th>
-                <th class='table_titre_1'>FORCE<br>(FO)</th>
-            </tr>
         </thead>
         <tbody>
+            <tr>                
+                <th class='table_titre_1'><i style='font-size:70%;'>COURAGE</i><br>(COU)</th>
+                <th class='table_titre_1'><i style='font-size:70%;'>INTELLIGENCE</i><br>(INT)</th>
+                <th class='table_titre_1'><i style='font-size:70%;'>CHARISME</i><br>(CHA)</th>
+                <th class='table_titre_1'><i style='font-size:70%;'>ADRESSE</i><br>(AD)</th>
+                <th class='table_titre_1'><i style='font-size:70%;'>FORCE</i><br>(FO)</th>
+            </tr>
             <tr>
                 <td class='table_titre_1'><?php echo $aventurier->AVENTURIER_COU; ?></td>
                 <td class='table_titre_1'><?php echo $aventurier->AVENTURIER_INT; ?></td>
@@ -103,8 +88,28 @@
                 <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_PR_MAX; ?></td>
             </tr>
         </tbody>
-    </table>
+    </table>    
     <br>
+    <div style="clear:both;"></div>
+     <table class='basique' style='width:45%;float:right;max-width:300px;'>
+        <thead>
+            <tr>
+                <th  class='table_titre_2'>Compétences</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class='table_titre_1'>
+                    <?php 
+                        foreach($aventurier->competences as $competence)
+                        {
+                            echo "<span style='cursor:help;' title='".str_replace("'","&apos;",$competence->COMPETENCE_SPECIAL)."'>".$competence."</span><br>";
+                        }   
+                    ?>
+                </td>
+            </tr>
+        </tbody>
+    </table>
     <table class='carac' style='width:65%;'>
         <thead>
             <tr>

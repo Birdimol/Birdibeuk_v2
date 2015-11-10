@@ -171,6 +171,13 @@ table.carac tbody tr td
     border:1px #3E404F solid;
 }
 
+table.carac tbody tr th
+{
+    width:50px;
+    border:1px #3E404F solid;
+    text-align:center;
+}
+
 table.carac thead tr th
 {
     width:50px;

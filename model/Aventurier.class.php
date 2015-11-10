@@ -433,6 +433,20 @@ class Aventurier
                 $this->origine = new Origine($array);
             }
         }
+        
+        $this->competences_choisies = array();
+        $this->competences_liees = array();
+     
+        $this->metier = new METIER($array);
+        $this->origine = new ORIGINE($array);        
+        //$this->DIEU = new Dieu($this->ID_DIEU);
+        
+        /*
+        $this->majCompetenceDB();
+        $this->majEquipementDB();
+        $this->majArmeDB();
+        $this->majProtectionDB();
+        */
     }
 
    
@@ -1137,7 +1151,7 @@ class Aventurier
     {
         $db = DatabaseManager::getDb();
 
-        $requete = "SELECT * 
+        $requete = "SELECT ".PREFIX_DB."aventurier.*, ".PREFIX_DB."metier.*, ".PREFIX_DB."origine.* 
             FROM ".PREFIX_DB."aventurier 
             join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = AVENTURIER_ORIGINE_ID 
             join ".PREFIX_DB."metier on ".PREFIX_DB."metier.METIER_ID = AVENTURIER_METIER_ID 
@@ -1147,27 +1161,7 @@ class Aventurier
     
         $ligne = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        foreach($ligne as $key=>$value)
-        {
-            if(property_exists("Aventurier",$key))
-            {
-                $this->$key = $value;
-            }
-        }
-        
-        $this->competences_choisies = array();
-        $this->competences_liees = array();
-     
-        $this->metier = new METIER($ligne);
-        $this->origine = new ORIGINE($ligne);        
-        //$this->DIEU = new Dieu($this->ID_DIEU);
-        
-        /*
-        $this->majCompetenceDB();
-        $this->majEquipementDB();
-        $this->majArmeDB();
-        $this->majProtectionDB();
-        */
+        $this->loadFromArray($ligne);
     }
     
     public function ajouterCompetence($ID_COMPETENCE)
