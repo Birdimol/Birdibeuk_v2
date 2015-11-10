@@ -9,7 +9,8 @@
  */
  ?>
 <div id='content'>
-    <h1 style='color:#900000;font-size:400%;'><?php echo $aventurier->AVENTURIER_NOM;
+    <div style='text-align:right;float:right;'><span class='lien' style='' ><a href='<?php echo $_SERVER["HTTP_REFERER"]; ?>'> Retour</a></span></div>
+    <h1 style='color:#900000;font-size:400%;margin-bottom:0px;'><?php echo $aventurier->AVENTURIER_NOM;
         if($aventurier->AVENTURIER_IMAGE_URL != "")
         {
             echo "<img id='image_aventurier' src='".$aventurier->AVENTURIER_IMAGE_URL."' style='float:left; width:150px;border:1px #3E404F solid;margin-right:20px;margin-bottom:20px;' />";
@@ -17,7 +18,7 @@
         
     ?></h1>
     
-    <h2>
+    <h2 style='margin-top:0px;margin-bottom:0px;'>
     <?php 
         echo $aventurier->origine." "; 
         if($aventurier->AVENTURIER_AUTRE_METIER != "")
@@ -26,9 +27,9 @@
         }
         else
         {
-            if($aventurier->metier != "Aucun")
+            if($aventurier->metier_nom != "Aucun")
             {
-                echo $aventurier->metier;
+                echo $aventurier->metier_nom;
             }
             else
             {
@@ -38,12 +39,24 @@
         echo " de niveau ".$aventurier->AVENTURIER_NIVEAU;
     ?>
     </h2>
+    <div style='font-size:150%;color:#900000;'>
+        <?php 
+            if($aventurier->AVENTURIER_PROVERBE != "")
+            {
+                echo '<i>"'.$aventurier->AVENTURIER_PROVERBE.'"</i>';
+            }
+            else
+            {
+                echo "&nbsp;";
+            }
+        ?>
+       
+    </div>
     <div style='font-size:150%;'>
         Sexe : <?php echo $aventurier->AVENTURIER_SEXE;?>
     </div>
     <div style="clear:both;"></div>
-   <img style='float:right;' src='view/aventurier/graph_carac_principale.php?COU=<?php echo $aventurier->AVENTURIER_COU;?>&INT=<?php echo $aventurier->AVENTURIER_INT;?>&CHA=<?php echo $aventurier->AVENTURIER_CHA;?>&AD=<?php echo $aventurier->AVENTURIER_AD;?>&FO=<?php echo $aventurier->AVENTURIER_FO;?>'>
-                
+    <img style='float:right;' src='view/aventurier/graph_carac_principale.php?COU=<?php echo $aventurier->AVENTURIER_COU;?>&INT=<?php echo $aventurier->AVENTURIER_INT;?>&CHA=<?php echo $aventurier->AVENTURIER_CHA;?>&AD=<?php echo $aventurier->AVENTURIER_AD;?>&FO=<?php echo $aventurier->AVENTURIER_FO;?>'>             
     <table class='carac' style='width:65%;'>
         <thead>        
             <tr>
@@ -69,29 +82,25 @@
     </table>
     <br>
     <table class='carac' style='width:65%;'>
-        <thead>
+        <thead>        
             <tr>
-                <th colspan='4' class='table_titre_2'>AUTRES CARACTERISTIQUES</th>
-            </tr>
-            <tr>
-                <th class='table_titre_1'>EXPERIENCE</th>
-                <th class='table_titre_1'>EV MAXIMUM</th>                
-                <th class='table_titre_1'>RESISTANCE MAGIQUE</th>
-                <th class='table_titre_1'>PR MAXIMUM</th>
+                <th colspan='5' class='table_titre_2'>COMBAT</th>
             </tr>
         </thead>
         <tbody>
+            <tr>                
+                <th class='table_titre_1'><i >ATTAQUE</i></th>
+                <th class='table_titre_1'><i >PARADE</i></th>
+            </tr>
             <tr>
-                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_XP; ?></td>
-                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_EV; ?></td>                
-                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_RESISTMAG; ?></td>
-                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_PR_MAX; ?></td>
+                <td class='table_titre_1'><?php echo $aventurier->AVENTURIER_AT; ?></td>
+                <td class='table_titre_1'><?php echo $aventurier->AVENTURIER_PRD; ?></td>
             </tr>
         </tbody>
-    </table>    
+    </table>
     <br>
     <div style="clear:both;"></div>
-     <table class='basique' style='width:45%;float:right;max-width:300px;'>
+    <table class='basique' style='width:45%;float:right;max-width:300px;'>
         <thead>
             <tr>
                 <th  class='table_titre_2'>Compétences</th>
@@ -110,6 +119,57 @@
             </tr>
         </tbody>
     </table>
+    <table class='carac' style='width:65%;'>
+        <thead>
+            <tr>
+                <th colspan='5' class='table_titre_2'>AUTRES CARACTERISTIQUES</th>
+            </tr>
+            <tr>
+                <th class='table_titre_1'>EXPERIENCE</th>
+                <th class='table_titre_1'>DESTIN</th>
+                <th class='table_titre_1'>EV</th>                
+                <th class='table_titre_1'>RESIST. MAGIQUE</th>
+                <th class='table_titre_1'>PR MAXIMUM</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_XP; ?></td>
+                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_DESTIN; ?></td>
+                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_EVACTUEL."/".$aventurier->AVENTURIER_EV; ?></td>                
+                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_RESISTMAG; ?></td>
+                <td  class='table_titre_1'><?php if($aventurier->AVENTURIER_PR_MAX == 0){echo "<i style='font-size:50%;'>Pas de limite</i>";}else{echo $aventurier->AVENTURIER_PR_MAX;} ?></td>
+            </tr>
+        </tbody>
+    </table>    
+    <br>
+    <?php 
+    if($aventurier->utiliseMagie())
+    {
+    ?>
+    <table class='carac' style='width:65%;'>
+        <thead>
+            <tr>
+                <th colspan='3' class='table_titre_2'>CARACTERISTIQUES MAGIQUES</th>
+            </tr>
+            <tr>
+                <th class='table_titre_1'>EA</th>
+                <th class='table_titre_1'>MAGIE PHYS</th>
+                <th class='table_titre_1'>MAGIE PSY</th>  
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_EAACTUEL."/".$aventurier->AVENTURIER_EA; ?></td>
+                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_MAGIEPHYS; ?></td>
+                <td  class='table_titre_1'><?php echo $aventurier->AVENTURIER_MAGIEPSY; ?></td>                
+            </tr>
+        </tbody>
+    </table>    
+    <br>
+    <?php 
+    }
+    ?>
     <table class='carac' style='width:65%;'>
         <thead>
             <tr>

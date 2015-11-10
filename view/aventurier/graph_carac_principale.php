@@ -2,7 +2,7 @@
         require_once (__DIR__.'/../../include/jpgraph/jpgraph.php');
         require_once (__DIR__.'/../../include/jpgraph/jpgraph_radar.php');
 
-        $graph = new RadarGraph(250,250);
+        $graph = new RadarGraph(300,250);
         $graph->SetScale('lin',5,17);
         //$graph->yscale->ticks->Set(25,5);
         $graph->SetColor('#D5D5BD');

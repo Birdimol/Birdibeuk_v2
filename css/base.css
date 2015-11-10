@@ -185,6 +185,19 @@ table.carac thead tr th
     text-align:center;
 }
 
+
+.lien
+{
+    background-color:#D5D5BD;
+    border:1px #3E404F solid;
+    padding:5px;
+}
+
+.lien:hover
+{
+    border:1px #900000 solid;
+}
+
 .element_menu:hover
 {
     padding-left:20px;

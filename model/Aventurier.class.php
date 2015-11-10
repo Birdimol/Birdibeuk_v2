@@ -202,6 +202,12 @@ class Aventurier
     private $AVENTURIER_DESCRIPTION;
     
     /**
+     * @brief string : Le proverbe favori de l'Aventurier
+     */
+    private $AVENTURIER_PROVERBE;
+    
+    
+    /**
      * @brief Dieu : Dieu de l'Aventurier
      *
      * null = pas de Dieu
@@ -332,6 +338,43 @@ class Aventurier
             
             return $this->MAGIE->NOM;
         }
+        else if($var == "metier_nom")
+        {
+            //mage ?
+            if($this->metier->METIER_NOM == "Mage")
+            {
+                if($this->AVENTURIER_AUTRE_METIER != "")
+                {
+                   return $this->AVENTURIER_AUTRE_METIER." (".$this->magie->MAGIE_NOM.")";
+                }
+                else
+                {
+                   return $this->metier->METIER_NOM." (".$this->magie->MAGIE_NOM.")";
+                }
+            }
+            else if( $this->metier->METIER_NOM == "Pretre" || $this->metier->METIER_NOM == "Paladin")
+            {
+                $temp = $this->metier->METIER_NOM;    
+                if($this->AVENTURIER_AUTRE_METIER != "")
+                {
+                    $temp = $this->AVENTURIER_AUTRE_METIER;
+                }
+                
+                if(in_array(substr($this->dieu->DIEU_NOM,0,1),array("A","E","I","O","U","Y")))
+                {
+                    $temp .= " d'".$this->dieu->DIEU_NOM;
+                }
+                else
+                {
+                    $temp .= " de ".$this->dieu->DIEU_NOM;
+                }                
+                return $temp;
+            }
+            else
+            {
+                return $this->metier;
+            }
+        }
         else if($var == "competences")
         {
             if(empty($this->competences))
@@ -346,7 +389,7 @@ class Aventurier
             {
                 $this->dieu = new dieu($this->ID_DIEU);
             }
-            return $this->dieu->NOM;
+            return $this->dieu;
         }
         else if(property_exists("Aventurier",$var))
         {
@@ -403,7 +446,7 @@ class Aventurier
      * @return  void
      */
     public function loadFromArray($array)
-    {			
+    {
         foreach($array as $key=>$value)
         {
             if(property_exists("Aventurier",$key))
@@ -432,14 +475,25 @@ class Aventurier
                 // sans refaire une requete.
                 $this->origine = new Origine($array);
             }
+            else if($key == "DIEU_NOM")
+            {
+                // Ceci dans le cas ou le tableau envoyé en parametre vient de la DB et possède
+                // les données de la table DIEU, on peut alors charger le dieu directement 
+                // sans refaire une requete.
+                $this->dieu = new Dieu($array);
+            }
+            else if($key == "MAGIE_NOM")
+            {
+                // Ceci dans le cas ou le tableau envoyé en parametre vient de la DB et possède
+                // les données de la table DIEU, on peut alors charger le dieu directement 
+                // sans refaire une requete.
+                $this->magie = new Magie($array);
+            }
         }
         
         $this->competences_choisies = array();
         $this->competences_liees = array();
      
-        $this->metier = new METIER($array);
-        $this->origine = new ORIGINE($array);        
-        //$this->DIEU = new Dieu($this->ID_DIEU);
         
         /*
         $this->majCompetenceDB();
@@ -448,8 +502,23 @@ class Aventurier
         $this->majProtectionDB();
         */
     }
-
-   
+    
+    /**
+     * @brief Determine si l'aventurier utilise la magie ou non.
+     *
+     * @return  Bool
+     */
+    public function utiliseMagie()
+    {
+        if($this->AVENTURIER_EA > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 	
 	/**
      * @brief Liste tous les aventuriers dans l'ordre donné et éventuellement filtrés par nom
@@ -473,6 +542,8 @@ class Aventurier
         $requete = "SELECT ".PREFIX_DB."aventurier.*, ".PREFIX_DB."metier.*, ".PREFIX_DB."origine.* 
             FROM ".PREFIX_DB."aventurier 
             join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = AVENTURIER_ORIGINE_ID 
+            left join ".PREFIX_DB."dieu on ".PREFIX_DB."dieu.DIEU_ID = AVENTURIER_DIEU_ID
+            left join ".PREFIX_DB."magie on ".PREFIX_DB."magie.MAGIE_ID = AVENTURIER_TYPEMAGIE_ID
             join ".PREFIX_DB."metier on ".PREFIX_DB."metier.METIER_ID = AVENTURIER_METIER_ID ";
 
         //si on a envoyé un nom, on balance le filtre dans la requete.
@@ -1151,11 +1222,14 @@ class Aventurier
     {
         $db = DatabaseManager::getDb();
 
-        $requete = "SELECT ".PREFIX_DB."aventurier.*, ".PREFIX_DB."metier.*, ".PREFIX_DB."origine.* 
+        $requete = "SELECT * 
             FROM ".PREFIX_DB."aventurier 
-            join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = AVENTURIER_ORIGINE_ID 
-            join ".PREFIX_DB."metier on ".PREFIX_DB."metier.METIER_ID = AVENTURIER_METIER_ID 
-            WHERE AVENTURIER_ID = ".$AVENTURIER_ID;    
+            join ".PREFIX_DB."origine on ".PREFIX_DB."origine.ORIGINE_ID = ".PREFIX_DB."aventurier.AVENTURIER_ORIGINE_ID 
+            left join ".PREFIX_DB."dieu on ".PREFIX_DB."dieu.DIEU_ID = ".PREFIX_DB."aventurier.AVENTURIER_DIEU_ID
+            left join ".PREFIX_DB."magie on ".PREFIX_DB."magie.MAGIE_ID = AVENTURIER_TYPEMAGIE_ID
+            join ".PREFIX_DB."metier on ".PREFIX_DB."metier.METIER_ID = ".PREFIX_DB."aventurier.AVENTURIER_METIER_ID 
+            WHERE AVENTURIER_ID = ".$AVENTURIER_ID;  
+        
         $stmt = $db->prepare($requete);
         $stmt->execute();
     
