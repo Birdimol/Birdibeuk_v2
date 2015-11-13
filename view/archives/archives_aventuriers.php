@@ -48,119 +48,47 @@
     <br>
     <table class="table">
         <thead>
-            <tr >
-                <th style='border-bottom:2px #3E404F solid;width:300px;'>
-                    <span onclick='change_sort("<?php 
-                                                    if($_GET["sort"] == "AVENTURIER_NOM-DESC")
-                                                    {
-                                                        echo "AVENTURIER_NOM-ASC";
-                                                    }
-                                                    else if($_GET["sort"] == "AVENTURIER_NOM-ASC")
-                                                    {
-                                                        echo "AVENTURIER_NOM-DESC";
-                                                    }
-                                                    else
-                                                    {
-                                                        echo "AVENTURIER_NOM-ASC";
-                                                    }
-                                                ?>");' style='cursor:pointer;'>NOM 
-                        <?php 
-                            if($_GET["sort"] == "AVENTURIER_NOM-DESC")
-                            {
-                                echo "<span class='glyphicon glyphicon-menu-down' ></span>";
-                            }
-                            else if($_GET["sort"] == "AVENTURIER_NOM-ASC")
-                            {
-                                echo "<span class='glyphicon glyphicon-menu-up' ></span>";
-                            }
+            <tr>
+                <?php                     
+                    function ecritTH($libelle,$nom)
+                    {
                         ?>
-                        
-                    </span> 
-                </th>
-                <th style='border-bottom:2px #3E404F solid;width:100px;'>
-                    <span onclick='change_sort("<?php 
-                                                    if($_GET["sort"] == "AVENTURIER_NIVEAU-DESC")
-                                                    {
-                                                        echo "AVENTURIER_NIVEAU-ASC";
-                                                    }
-                                                    else if($_GET["sort"] == "AVENTURIER_NIVEAU-ASC")
-                                                    {
-                                                        echo "AVENTURIER_NIVEAU-DESC";
-                                                    }
-                                                    else
-                                                    {
-                                                        echo "AVENTURIER_NIVEAU-ASC";
-                                                    }
-                                                ?>");' style='cursor:pointer;'>NIVEAU 
+                            <th style='border-bottom:2px #3E404F solid;width:200px;'>
+                                <span onclick='change_sort("<?php 
+                                                                if($_GET["sort"] == $nom."-DESC")
+                                                                {
+                                                                    echo $nom."-ASC";
+                                                                }
+                                                                else if($_GET["sort"] == $nom."-ASC")
+                                                                {
+                                                                    echo $nom."-DESC";
+                                                                }
+                                                                else
+                                                                {
+                                                                    echo $nom."-ASC";
+                                                                }
+                                                            ?>");' style='cursor:pointer;'><?php echo $libelle;?>
+                                    <?php 
+                                        if($_GET["sort"] == $nom."-DESC")
+                                        {
+                                            echo "<span class='glyphicon glyphicon-menu-down' ></span>";
+                                        }
+                                        else if($_GET["sort"] == $nom."-ASC")
+                                        {
+                                            echo "<span class='glyphicon glyphicon-menu-up' ></span>";
+                                        }
+                                    ?>
+                                    
+                                </span> 
+                            </th>
                         <?php 
-                            if($_GET["sort"] == "AVENTURIER_NIVEAU-DESC")
-                            {
-                                echo "<span class='glyphicon glyphicon-menu-down' ></span>";
-                            }
-                            else if($_GET["sort"] == "AVENTURIER_NIVEAU-ASC")
-                            {
-                                echo "<span class='glyphicon glyphicon-menu-up' ></span>";
-                            }
-                        ?>
-                        
-                    </span> 
-                </th>
-                <th style='border-bottom:2px #3E404F solid;width:200px;'>
-                    <span onclick='change_sort("<?php 
-                                                    if($_GET["sort"] == "ORIGINE_NOM-DESC")
-                                                    {
-                                                        echo "ORIGINE_NOM-ASC";
-                                                    }
-                                                    else if($_GET["sort"] == "ORIGINE_NOM-ASC")
-                                                    {
-                                                        echo "ORIGINE_NOM-DESC";
-                                                    }
-                                                    else
-                                                    {
-                                                        echo "ORIGINE_NOM-ASC";
-                                                    }
-                                                ?>");' style='cursor:pointer;'>ORIGINE 
-                        <?php 
-                            if($_GET["sort"] == "ORIGINE_NOM-DESC")
-                            {
-                                echo "<span class='glyphicon glyphicon-menu-down' ></span>";
-                            }
-                            else if($_GET["sort"] == "ORIGINE_NOM-ASC")
-                            {
-                                echo "<span class='glyphicon glyphicon-menu-up' ></span>";
-                            }
-                        ?>
-                        
-                    </span> 
-                </th>
-                <th style='border-bottom:2px #3E404F solid;width:200px;'>
-                <span onclick='change_sort("<?php 
-                                                    if($_GET["sort"] == "METIER_NOM-DESC")
-                                                    {
-                                                        echo "METIER_NOM-ASC";
-                                                    }
-                                                    else if($_GET["sort"] == "METIER_NOM-ASC")
-                                                    {
-                                                        echo "METIER_NOM-DESC";
-                                                    }
-                                                    else
-                                                    {
-                                                        echo "METIER_NOM-ASC";
-                                                    }
-                                                ?>");' style='cursor:pointer;'>METIER 
-                        <?php 
-                            if($_GET["sort"] == "METIER_NOM-DESC")
-                            {
-                                echo "<span class='glyphicon glyphicon-menu-down' ></span>";
-                            }
-                            else if($_GET["sort"] == "METIER_NOM-ASC")
-                            {
-                                echo "<span class='glyphicon glyphicon-menu-up' ></span>";
-                            }
-                        ?>
-                        
-                    </span> 
-                </th>
+                    }
+                    
+                    ecritTH("NOM","AVENTURIER_NOM");
+                    ecritTH("NIVEAU","AVENTURIER_NIVEAU");
+                    ecritTH("ORIGINE","ORIGINE_NOM");
+                    ecritTH("METIER","METIER_NOM");
+                ?>
             </tr>            
         </thead>
         <tbody>

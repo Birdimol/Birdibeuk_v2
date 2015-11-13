@@ -167,9 +167,38 @@
         </tbody>
     </table>    
     <br>
-    <?php 
+     <?php 
     }
     ?>
+    <table class='carac' style='width:65%;'>
+        <thead>
+            <tr>
+                <th colspan='3' class='table_titre_2'>ARMES</th>
+            </tr>
+            <tr>
+                <th class='table_titre_1' style='width:70%;'>NOM</th>
+                <th class='table_titre_1' style='width:15%;'>PI</th>
+                <th class='table_titre_1' style='width:15%;'>RUP</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php 
+            foreach($aventurier->armes as $arme)
+            {
+                ?>
+                <tr>
+                    <td  class='table_titre_1'><?php echo $arme->ARME_NOM; ?></td>
+                    <td  class='table_titre_1'><?php echo $arme->ARME_PI; ?></td>
+                    <td  class='table_titre_1'><?php echo $arme->ARME_RUP; ?></td>
+                </tr>
+                <?php 
+            }
+        ?>            
+        </tbody>
+    </table>
+    
+    <br>
+   
     <table class='carac' style='width:65%;'>
         <thead>
             <tr>

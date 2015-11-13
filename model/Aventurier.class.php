@@ -287,6 +287,51 @@ class Aventurier
             $this->competences = array();
         }
     }
+    
+    /**
+     * @brief S'assure que toutes les valeurs des attributs de l'objet sont correcte
+     * pour être éventuellement utilisée dans une requête.
+     *
+     * 
+     * @return  void
+     */
+    public function verifieValeurs()
+    {       
+        if(empty($this->AVENTURIER_ORIGINE_ID)){$this->AVENTURIER_ORIGINE_ID = 0;}
+        if(empty($this->AVENTURIER_METIER_ID)){$this->AVENTURIER_METIER_ID = 0;}
+        if(empty($this->AVENTURIER_EV)){$this->AVENTURIER_EV = 0;}
+        if(empty($this->AVENTURIER_EA)){$this->AVENTURIER_EA = 0;}
+        
+        if(empty($this->AVENTURIER_EVACTUEL)){$this->AVENTURIER_EVACTUEL = 0;}
+        if(empty($this->AVENTURIER_EAACTUEL)){$this->AVENTURIER_EAACTUEL = 0;}
+        
+        if(empty($this->AVENTURIER_COU)){$this->AVENTURIER_COU = 0;}
+        if(empty($this->AVENTURIER_FOR)){$this->AVENTURIER_FOR = 0;}
+        if(empty($this->AVENTURIER_AT)){$this->AVENTURIER_AT = 0;}
+        if(empty($this->AVENTURIER_PRD)){$this->AVENTURIER_PRD = 0;}
+        if(empty($this->AVENTURIER_AD)){$this->AVENTURIER_AD = 0;}
+        if(empty($this->AVENTURIER_CHA)){$this->AVENTURIER_CHA = 0;}
+        if(empty($this->AVENTURIER_INT)){$this->AVENTURIER_INT = 0;}        
+        
+        if(empty($this->AVENTURIER_XP)){$this->AVENTURIER_XP = 0;}
+        if(empty($this->AVENTURIER_DESTIN)){$this->AVENTURIER_DESTIN = 0;}
+        
+        if(empty($this->AVENTURIER_OR)){$this->AVENTURIER_OR = 0;}
+        if(empty($this->AVENTURIER_ARGENT)){$this->AVENTURIER_ARGENT = 0;}
+        if(empty($this->AVENTURIER_CUIVRE)){$this->AVENTURIER_CUIVRE = 0;}
+        
+        if(empty($this->AVENTURIER_NIVEAU)){$this->AVENTURIER_NIVEAU = 0;}
+        if(empty($this->AVENTURIER_USER_ID)){$this->AVENTURIER_USER_ID = 0;}
+        if(empty($this->AVENTURIER_TYPE) || $this->AVENTURIER_TYPE=="aventurier"){$this->AVENTURIER_TYPE = 0;}
+        if(empty($this->AVENTURIER_MAGIEPHYS)){$this->AVENTURIER_MAGIEPHYS = 0;}
+        if(empty($this->AVENTURIER_MAGIEPSY)){$this->AVENTURIER_MAGIEPSY = 0;}
+        if(empty($this->AVENTURIER_RESISTMAG)){$this->AVENTURIER_RESISTMAG = 0;}
+        if(empty($this->AVENTURIER_TYPEMAGIE_ID)){$this->AVENTURIER_TYPEMAGIE_ID = 0;}
+        if(empty($this->AVENTURIER_DIEU_ID)){$this->AVENTURIER_DIEU_ID = 0;}
+        if(empty($this->AVENTURIER_PR_MAX)){$this->AVENTURIER_PR_MAX = 0;}
+        if(empty($this->AVENTURIER_PR)){$this->AVENTURIER_PR = 0;}        
+        if(empty($this->AVENTURIER_BONUS_DEGAT)){$this->AVENTURIER_BONUS_DEGAT = 0;}        
+    }
 
     /**
      * @brief Constructeur de la classe Aventurier
@@ -494,7 +539,7 @@ class Aventurier
         $this->competences_choisies = array();
         $this->competences_liees = array();
      
-        
+        $this->majArmeDB();
         /*
         $this->majCompetenceDB();
         $this->majEquipementDB();
@@ -526,6 +571,7 @@ class Aventurier
      * Renvoie la liste d'aventurier sous forme d'un tableau d'objet.
      * @param   $ordre définit quel ORDER BY utiliser dans la requête 
      * @param   $nom   définit quel filtre utiliser sur le nom 
+     * @param   $limit définit l'intervalle des lignes à renvoyer 
      * 
      * @return  Tableau<Aventurier>
      */
@@ -729,51 +775,7 @@ class Aventurier
         return $tableau;
 	}
     
-    /**
-     * @brief S'assure que toutes les valeurs des attributs de l'objet sont correcte
-     * pour être éventuellement utilisée dans une requête.
-     *
-     * Renvoie la liste d'aventurier sous forme d'un tableau d'objet Aventurier.
-     * 
-     * @return  void
-     */
-    public function verifieValeurs()
-    {       
-        if(empty($this->AVENTURIER_ORIGINE_ID)){$this->AVENTURIER_ORIGINE_ID = 0;}
-        if(empty($this->AVENTURIER_METIER_ID)){$this->AVENTURIER_METIER_ID = 0;}
-        if(empty($this->AVENTURIER_EV)){$this->AVENTURIER_EV = 0;}
-        if(empty($this->AVENTURIER_EA)){$this->AVENTURIER_EA = 0;}
-        
-        if(empty($this->AVENTURIER_EVACTUEL)){$this->AVENTURIER_EVACTUEL = 0;}
-        if(empty($this->AVENTURIER_EAACTUEL)){$this->AVENTURIER_EAACTUEL = 0;}
-        
-        if(empty($this->AVENTURIER_COU)){$this->AVENTURIER_COU = 0;}
-        if(empty($this->AVENTURIER_FOR)){$this->AVENTURIER_FOR = 0;}
-        if(empty($this->AVENTURIER_AT)){$this->AVENTURIER_AT = 0;}
-        if(empty($this->AVENTURIER_PRD)){$this->AVENTURIER_PRD = 0;}
-        if(empty($this->AVENTURIER_AD)){$this->AVENTURIER_AD = 0;}
-        if(empty($this->AVENTURIER_CHA)){$this->AVENTURIER_CHA = 0;}
-        if(empty($this->AVENTURIER_INT)){$this->AVENTURIER_INT = 0;}        
-        
-        if(empty($this->AVENTURIER_XP)){$this->AVENTURIER_XP = 0;}
-        if(empty($this->AVENTURIER_DESTIN)){$this->AVENTURIER_DESTIN = 0;}
-        
-        if(empty($this->AVENTURIER_OR)){$this->AVENTURIER_OR = 0;}
-        if(empty($this->AVENTURIER_ARGENT)){$this->AVENTURIER_ARGENT = 0;}
-        if(empty($this->AVENTURIER_CUIVRE)){$this->AVENTURIER_CUIVRE = 0;}
-        
-        if(empty($this->AVENTURIER_NIVEAU)){$this->AVENTURIER_NIVEAU = 0;}
-        if(empty($this->AVENTURIER_USER_ID)){$this->AVENTURIER_USER_ID = 0;}
-        if(empty($this->AVENTURIER_TYPE) || $this->AVENTURIER_TYPE=="aventurier"){$this->AVENTURIER_TYPE = 0;}
-        if(empty($this->AVENTURIER_MAGIEPHYS)){$this->AVENTURIER_MAGIEPHYS = 0;}
-        if(empty($this->AVENTURIER_MAGIEPSY)){$this->AVENTURIER_MAGIEPSY = 0;}
-        if(empty($this->AVENTURIER_RESISTMAG)){$this->AVENTURIER_RESISTMAG = 0;}
-        if(empty($this->AVENTURIER_TYPEMAGIE_ID)){$this->AVENTURIER_TYPEMAGIE_ID = 0;}
-        if(empty($this->AVENTURIER_DIEU_ID)){$this->AVENTURIER_DIEU_ID = 0;}
-        if(empty($this->AVENTURIER_PR_MAX)){$this->AVENTURIER_PR_MAX = 0;}
-        if(empty($this->AVENTURIER_PR)){$this->AVENTURIER_PR = 0;}        
-        if(empty($this->AVENTURIER_BONUS_DEGAT)){$this->AVENTURIER_BONUS_DEGAT = 0;}        
-    }
+    
     
     /**
      * @brief Calcul le total de PR de l'Aventurier
@@ -1388,7 +1390,7 @@ class Aventurier
     {
         $db = DatabaseManager::getDb();
         
-        $requete = "SELECT * FROM lien_aventurier_arme WHERE ID_AVENTURIER = ".$this->ID;  
+        $requete = "SELECT * FROM ".PREFIX_DB."arme WHERE ARME_AVENTURIER_ID = ".$this->AVENTURIER_ID;  
         
         $stmt = $db->prepare($requete);
         $stmt->execute();
@@ -1397,7 +1399,7 @@ class Aventurier
         
         while($ligne = $stmt->fetch(PDO::FETCH_ASSOC))
         {
-           $comp = new Arme($ligne["ID_ARME"]);
+           $comp = new Arme($ligne);
            $this->armes[] = $comp;
         }        
     }  
