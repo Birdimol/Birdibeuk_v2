@@ -413,6 +413,7 @@ class Arme
 	public function verifieValeurs()
     {       
         if(empty($this->ARME_PR)){$this->ARME_PR = 0;}
+        if(empty($this->ARME_AVENTURIER_ID)){$this->ARME_AVENTURIER_ID = 0;}
         if(empty($this->ARME_COU)){$this->ARME_COU = 0;}
         if(empty($this->ARME_INT)){$this->ARME_INT = 0;}
         if(empty($this->ARME_CHA)){$this->ARME_CHA = 0;}
@@ -511,7 +512,8 @@ class Arme
             ARME_DEUXMAINS, 
             ARME_DEBASE, 
             ARME_USER_CREATION_ID, 
-            ARME_OFFICIEL
+            ARME_OFFICIEL,
+            ARME_AVENTURIER_ID
             ) 
         VALUES 
             (
@@ -534,12 +536,15 @@ class Arme
             ".$this->ARME_DEUXMAINS.", 
             ".$this->ARME_DEBASE.", 
             ".$id_user_creation.", 
-            ".$this->ARME_OFFICIEL."
+            ".$this->ARME_OFFICIEL.",
+            ".$this->ARME_AVENTURIER_ID."
             )";
 
         $stmt = $db->prepare($requete);
         $stmt->execute();
         $this->ARME_ID = $db->lastInsertId(); 
+        
+        echo $requete."<br>";
     }
 
     public function modifier()

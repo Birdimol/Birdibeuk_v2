@@ -19,6 +19,10 @@
     {
         inclure_controleur(__DIR__."/../controler/aventurier/".$ctrl.".php");
     }
+    else if(strpos($ctrl,"inscription") === 0 || strpos($ctrl,"connexion") === 0)
+    {
+        inclure_controleur(__DIR__."/../controler/inscription_connexion/".$ctrl.".php");
+    }
     else
     {
         //controleur à la racine

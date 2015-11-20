@@ -8,7 +8,7 @@
             <div class='element_menu' ><a href='index.php?ctrl=creation_aventurier_1'>Créer un aventurier</a></div>
             <div class='element_menu'><a href='index.php?ctrl=archives_menu'>Archives</a></div>
             <div class='element_menu'>Outils MJ</div>
-            <div class='element_menu'>Inscription/connexion</div>
+            <div class='element_menu'><a href='index.php?ctrl=inscription_connexion'>Inscription/connexion</a></div>
         </div>
     </div>                
 </div>

@@ -78,6 +78,15 @@ a:hover
     text-align:center;
     color:#900000;
 }   
+
+.cadre
+{
+    background-color: #D5D5BD;
+    padding:20px;
+    border-radius: 20px;
+    border:2px #900000 solid;
+    text-align:center;
+} 
     
 .paragraphe
 {

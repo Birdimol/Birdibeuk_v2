@@ -187,9 +187,9 @@
             {
                 ?>
                 <tr>
-                    <td  class='table_titre_1'><?php echo $arme->ARME_NOM; ?></td>
-                    <td  class='table_titre_1'><?php echo $arme->ARME_PI; ?></td>
-                    <td  class='table_titre_1'><?php echo $arme->ARME_RUP; ?></td>
+                    <td  class='table_titre_1' style='font-size:100%'><?php echo $arme->ARME_NOM; ?></td>
+                    <td  class='table_titre_1' style='font-size:100%'><?php echo $arme->ARME_PI; ?></td>
+                    <td  class='table_titre_1' style='font-size:100%'><?php echo $arme->ARME_RUP; ?></td>
                 </tr>
                 <?php 
             }
